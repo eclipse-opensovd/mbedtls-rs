@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0
+
+filegroup(
+    name = "source",
+    srcs = glob(
+        [
+            "cmake/**",
+            "framework/CMakeLists.txt",
+            "include/**",
+            "library/**",
+            "pkgconfig/**",
+            "tf-psa-crypto/cmake/**",
+            "tf-psa-crypto/core/**",
+            "tf-psa-crypto/doxygen/input/doc_mainpage.h.in",
+            "tf-psa-crypto/doxygen/tfpsacrypto.doxyfile.in",
+            "tf-psa-crypto/drivers/**",
+            "tf-psa-crypto/framework/CMakeLists.txt",
+            "tf-psa-crypto/include/**",
+            "tf-psa-crypto/pkgconfig/**",
+        ],
+    ) + [
+        "CMakeLists.txt",
+        "tf-psa-crypto/CMakeLists.txt",
+    ],
+    visibility = ["//mbedtls-sys:__pkg__"],
+)
