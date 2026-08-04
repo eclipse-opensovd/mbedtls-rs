@@ -187,7 +187,8 @@ prune_vendor_tree "$STAGING"
 log "Applying patches from ${PATCHES_DIR}..."
 for patch_file in \
     "${PATCHES_DIR}/record-size-limit-tls12.patch" \
-    "${PATCHES_DIR}/ed25519-psa-driver.patch"; do
+    "${PATCHES_DIR}/ed25519-psa-driver.patch" \
+    "${PATCHES_DIR}/cmake-build-dir-generated-files.patch"; do
     if [ ! -f "$patch_file" ]; then
         err "Required patch not found: $patch_file"
     fi

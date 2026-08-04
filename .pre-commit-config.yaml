@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        exclude: '^vendor/'
+      - id: check-toml
+        exclude: '^vendor/'
+      - id: check-merge-conflict
+        exclude: '^vendor/'
+      - id: end-of-file-fixer
+        exclude: '^vendor/'
+      - id: trailing-whitespace
+        exclude: '(^vendor/|\.(patch|diff)$)'
+      - id: mixed-line-ending
+        exclude: '^vendor/'
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        exclude: '^vendor/'
+  - repo: https://github.com/eclipse-opensovd/cicd-workflows
+    rev: 07140bdd84f20b66fd4aff58a83c5148deec388c
+    hooks:
+      - id: reuse-annotate
+        exclude: '^(vendor/|LICENSE$)'
+      - id: no-unicode-check
+        args:
+          - --allowed-chars=µ,§
+        exclude: '^(vendor/|mbedtls-sys/src/bindings\.rs$)'
+      - id: no-banner-comment-check
+        exclude: '^vendor/'

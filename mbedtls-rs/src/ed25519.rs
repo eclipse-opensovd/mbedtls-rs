@@ -96,12 +96,21 @@ mod tests {
         let sig_hex = "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a\
             33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b";
 
-        let pub_key = hex::decode(pub_key_hex).unwrap();
-        let sig = hex::decode(sig_hex).unwrap();
+        let pub_key = hex::decode(pub_key_hex).expect("RFC 8032 public key must decode");
+        let sig = hex::decode(sig_hex).expect("RFC 8032 signature must decode");
 
         // First test: dalek directly
-        let vk = VerifyingKey::from_bytes(pub_key.as_slice().try_into().unwrap()).unwrap();
-        let signature = Signature::from_bytes(sig.as_slice().try_into().unwrap());
+        let pub_key_bytes: &[u8; 32] = pub_key
+            .as_slice()
+            .try_into()
+            .expect("RFC 8032 public key must contain 32 bytes");
+        let sig_bytes: &[u8; 64] = sig
+            .as_slice()
+            .try_into()
+            .expect("RFC 8032 signature must contain 64 bytes");
+        let vk =
+            VerifyingKey::from_bytes(pub_key_bytes).expect("RFC 8032 public key must be valid");
+        let signature = Signature::from_bytes(sig_bytes);
         assert!(
             vk.verify(msg, &signature).is_ok(),
             "dalek direct verify should pass"
@@ -124,7 +133,7 @@ mod tests {
     #[test]
     fn test_ed25519_verify_bad_sig() {
         let pub_key_hex = "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a";
-        let pub_key = hex::decode(pub_key_hex).unwrap();
+        let pub_key = hex::decode(pub_key_hex).expect("RFC 8032 public key must decode");
         let msg = b"hello";
         let bad_sig = [0u8; 64];
 

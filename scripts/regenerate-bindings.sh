@@ -20,13 +20,16 @@
 #
 # Requirements:
 #   - clang (for bindgen's libclang)
-#   - Rust toolchain (cargo)
+#   - Rust 1.88 toolchain (cargo)
+#   - pinned nightly Rust toolchain with rustfmt
 #   - vendor/mbedtls-4.0.0/ must exist (run refresh-vendor.sh first)
 #
 # Cross-compilation:
 #   Set BINDGEN_SYSROOT to your SDK sysroot before running this script.
 
 set -euo pipefail
+
+NIGHTLY_TOOLCHAIN="nightly-2025-07-14"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -42,10 +45,20 @@ if ! command -v clang >/dev/null 2>&1; then
     err "clang not found. Install clang before regenerating bindings."
 fi
 
+if ! rustup run "${NIGHTLY_TOOLCHAIN}" rustfmt --version >/dev/null 2>&1; then
+    err "Pinned nightly rustfmt not found. Install the nightly toolchain with rustfmt."
+fi
+
 log "Regenerating src/bindings.rs (this triggers a full mbedtls build)..."
 cargo build \
     --manifest-path "${REPO_ROOT}/mbedtls-sys/Cargo.toml" \
     --features generate-bindings
+
+log "Formatting generated bindings with nightly rustfmt..."
+rustup run "${NIGHTLY_TOOLCHAIN}" rustfmt \
+    --edition 2024 \
+    --config-path "${REPO_ROOT}/.rustfmt.toml" \
+    "${REPO_ROOT}/mbedtls-sys/src/bindings.rs"
 
 log "Done. mbedtls-sys/src/bindings.rs updated."
 log "Review the diff and commit if correct."

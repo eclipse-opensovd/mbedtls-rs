@@ -73,7 +73,7 @@ set(version_number_files
         doxygen/tfpsacrypto.doxyfile)
 foreach(file ${version_number_files})
     configure_file(${file}.in
-                   ${TF_PSA_CRYPTO_DIR}/${file})
+                   ${CMAKE_CURRENT_BINARY_DIR}/${file})
 endforeach(file)
 
 ADD_CUSTOM_TARGET(${TF_PSA_CRYPTO_TARGET_PREFIX}tfpsacrypto-apidoc

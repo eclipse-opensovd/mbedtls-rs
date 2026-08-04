@@ -18,7 +18,15 @@ These patches extends mbedtls 4.0.0 with two features absent from upstream:
 - **`record_size_limit` (RFC 8449) for TLS 1.2**
 - **Ed25519 (PureEdDSA) support across the PSA, PK, X.509, and TLS 1.2 layers**
 
-The patch order is `record-size-limit-tls12.patch` first and then `ed25519-psa-driver.patch`
+The patch order is `record-size-limit-tls12.patch`, `ed25519-psa-driver.patch`,
+and then `cmake-build-dir-generated-files.patch`.
+
+## CMake build-directory outputs
+
+The upstream TF-PSA CMake configuration writes generated Doxygen inputs into
+the source tree during every configure step. The third patch redirects those
+files into the CMake build directory, keeping Cargo and Bazel builds
+source-clean.
 
 ## `record_size_limit` (RFC 8449) for TLS 1.2
 

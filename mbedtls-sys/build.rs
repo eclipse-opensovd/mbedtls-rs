@@ -32,10 +32,12 @@
 //!   - `MBEDTLS_DIR`: override mbedtls source path (skips vendor/ lookup).
 //!   - `BINDGEN_SYSROOT`: passed as `--sysroot` to clang (cross-compilation).
 
-use std::env;
 #[cfg(feature = "generate-bindings")]
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 const MBEDTLS_VERSION: &str = "4.0.0";
 const MBEDTLS_SOURCE_OVERRIDE_VAR: &str = "MBEDTLS_DIR";
@@ -147,8 +149,7 @@ fn resolve_mbedtls_src(manifest_dir: &Path) -> PathBuf {
 
     assert!(
         vendor_path.join("CMakeLists.txt").exists(),
-        "mbedtls source not found at {}. \
-        Run scripts/refresh-vendor.sh or set MBEDTLS_DIR.",
+        "mbedtls source not found at {}. Run scripts/refresh-vendor.sh or set MBEDTLS_DIR.",
         vendor_path.display()
     );
 
@@ -188,11 +189,17 @@ fn regenerate_bindings(manifest_dir: &Path, mbedtls_src: &Path) {
         .allowlist_var("MBEDTLS_.*")
         .allowlist_var("PSA_.*")
         .allowlist_var("TF_PSA_CRYPTO_.*")
+        .blocklist_var("MBEDTLS_MPI_UINT_MAX")
+        .blocklist_var("MBEDTLS_PRINTF_MS_TIME")
         .derive_debug(true)
         .derive_default(true)
         .derive_copy(true)
         .generate_comments(true)
         .prepend_enum_name(true)
+        .opaque_type("mbedtls_time_t")
+        .opaque_type("time_t")
+        .opaque_type("tm")
+        .formatter(bindgen::Formatter::None)
         .layout_tests(false);
 
     for inc in &include_paths {
@@ -219,7 +226,7 @@ fn regenerate_bindings(manifest_dir: &Path, mbedtls_src: &Path) {
         .expect("Failed to write src/bindings.rs");
 
     let generated = fs::read_to_string(&out).expect("Failed to read generated bindings");
-    let content = format!("{GENERATED_FILE_HEADER}{generated}");
+    let content = format!("{GENERATED_FILE_HEADER}{}\n", generated.trim_end());
     fs::write(&out, content).expect("Failed to prepend SPDX header to generated bindings");
 
     eprintln!("Bindings written to {}", out.display());

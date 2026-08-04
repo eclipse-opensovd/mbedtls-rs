@@ -20,12 +20,7 @@
 #include "ed25519_psa_driver.h"
 #include <string.h>
 
-/* ---------------------------------------------------------------------------
- * FFI: implemented in Rust (src/ed25519.rs)
- *
- * Returns 0 on successful verification, non-zero on failure.
- * ---------------------------------------------------------------------------
- */
+/* FFI implemented in Rust (src/ed25519.rs). Returns 0 on success. */
 extern int rust_ed25519_verify(const uint8_t *pub_key, size_t pub_key_len,
                                const uint8_t *msg, size_t msg_len,
                                const uint8_t *sig, size_t sig_len);
@@ -35,10 +30,7 @@ extern int rust_ed25519_verify(const uint8_t *pub_key, size_t pub_key_len,
 /* Ed25519 signature size (RFC 8032) */
 #define ED25519_SIG_SIZE 64
 
-/* ---------------------------------------------------------------------------
- * psa_import_key  -  transparent driver entry point
- * ---------------------------------------------------------------------------
- */
+/* psa_import_key: transparent driver entry point. */
 psa_status_t ed25519_psa_import_key(const psa_key_attributes_t *attributes,
                                     const uint8_t *data, size_t data_length,
                                     uint8_t *key_buffer, size_t key_buffer_size,
@@ -65,10 +57,7 @@ psa_status_t ed25519_psa_import_key(const psa_key_attributes_t *attributes,
   return PSA_SUCCESS;
 }
 
-/* ---------------------------------------------------------------------------
- * psa_verify_message  -  transparent driver entry point
- * ---------------------------------------------------------------------------
- */
+/* psa_verify_message: transparent driver entry point. */
 psa_status_t ed25519_psa_verify_message(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *input,

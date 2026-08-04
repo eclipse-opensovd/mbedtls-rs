@@ -9,21 +9,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# Build artifacts
-/target/
-/bazel-*
+# Map file patterns to reuse annotate --style values.
+# Keys = reuse style names, values = shell glob patterns matched against basename.
+# Every file type MUST have a matching pattern - unmatched files will error.
+#
+# Downstream repos can override by committing their own .reuse/styles.toml.
 
-# Editor/IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Cargo lock for libraries (keep for workspace reproducibility)
-# Cargo.lock is intentionally committed
-
-# macOS
-.DS_Store
-
-# generated doxyfile
-tfpsacrypto.doxyfile
+[styles]
+c = ["*.rs", "*.kt", "*.kts"]
+html = ["*.odx-*"]
+python = [".yamlfmt", "*.py", "*.pyi"]

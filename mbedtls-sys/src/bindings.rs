@@ -349,7 +349,6 @@ pub const MBEDTLS_ERR_MPI_NOT_ACCEPTABLE: i32 = -14;
 pub const MBEDTLS_MPI_MAX_LIMBS: u32 = 10000;
 pub const MBEDTLS_MPI_WINDOW_SIZE: u32 = 3;
 pub const MBEDTLS_MPI_MAX_SIZE: u32 = 1024;
-pub const MBEDTLS_MPI_UINT_MAX: i32 = -1;
 pub const MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE: i32 = -20096;
 pub const MBEDTLS_ERR_ECP_RANDOM_FAILED: i32 = -19712;
 pub const MBEDTLS_ERR_ECP_INVALID_KEY: i32 = -19584;
@@ -885,7 +884,6 @@ pub const MBEDTLS_SSL_UNEXPECTED_CID_FAIL: u32 = 1;
 pub const MBEDTLS_SSL_EXPORT_MAX_KEY_LEN: u32 = 8160;
 pub const MBEDTLS_PRINTF_SIZET: &[u8; 3] = b"zu\0";
 pub const MBEDTLS_PRINTF_LONGLONG: &[u8; 4] = b"lld\0";
-pub const MBEDTLS_PRINTF_MS_TIME: &[u8; 4] = b"lld\0";
 pub const MBEDTLS_ERR_NET_SOCKET_FAILED: i32 = -66;
 pub const MBEDTLS_ERR_NET_CONNECT_FAILED: i32 = -68;
 pub const MBEDTLS_ERR_NET_BIND_FAILED: i32 = -70;
@@ -909,40 +907,36 @@ pub const MBEDTLS_SSL_COOKIE_TIMEOUT: u32 = 60;
 pub const MBEDTLS_SSL_TICKET_MAX_KEY_BYTES: u32 = 32;
 pub const MBEDTLS_SSL_TICKET_KEY_NAME_BYTES: u32 = 4;
 pub type mbedtls_iso_c_forbids_empty_translation_units = ::std::os::raw::c_int;
-pub type __darwin_time_t = ::std::os::raw::c_long;
-pub type time_t = __darwin_time_t;
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[repr(align(8))]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct tm {
-    pub tm_sec: ::std::os::raw::c_int,
-    pub tm_min: ::std::os::raw::c_int,
-    pub tm_hour: ::std::os::raw::c_int,
-    pub tm_mday: ::std::os::raw::c_int,
-    pub tm_mon: ::std::os::raw::c_int,
-    pub tm_year: ::std::os::raw::c_int,
-    pub tm_wday: ::std::os::raw::c_int,
-    pub tm_yday: ::std::os::raw::c_int,
-    pub tm_isdst: ::std::os::raw::c_int,
-    pub tm_gmtoff: ::std::os::raw::c_long,
-    pub tm_zone: *mut ::std::os::raw::c_char,
+    pub _bindgen_opaque_blob: [u64; 7usize],
 }
-impl Default for tm {
-    fn default() -> Self {
-        let mut s = ::std::mem::MaybeUninit::<Self>::uninit();
-        unsafe {
-            ::std::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
-    }
-}
-pub type mbedtls_time_t = time_t;
+pub type mbedtls_time_t = u64;
 pub type mbedtls_ms_time_t = i64;
 unsafe extern "C" {
-    #[doc = " \\brief   Get time in milliseconds.\n\n \\return Monotonically-increasing current time in milliseconds.\n\n \\note Define MBEDTLS_PLATFORM_MS_TIME_ALT to be able to provide an\n       alternative implementation\n\n \\warning This function returns a monotonically-increasing time value from a\n          start time that will differ from platform to platform, and possibly\n          from run to run of the process.\n"]
+    #[doc = " \\brief   Get time in milliseconds.\n\n \\return Monotonically-increasing current \
+             time in milliseconds.\n\n \\note Define MBEDTLS_PLATFORM_MS_TIME_ALT to be able to \
+             provide an\n       alternative implementation\n\n \\warning This function returns a \
+             monotonically-increasing time value from a\n          start time that will differ \
+             from platform to platform, and possibly\n          from run to run of the process.\n"]
     pub fn mbedtls_ms_time() -> mbedtls_ms_time_t;
 }
 unsafe extern "C" {
-    #[doc = " \\brief       Securely zeroize a buffer\n\n              The function is meant to wipe the data contained in a buffer so\n              that it can no longer be recovered even if the program memory\n              is later compromised. Call this function on sensitive data\n              stored on the stack before returning from a function, and on\n              sensitive data stored on the heap before freeing the heap\n              object.\n\n              It is extremely difficult to guarantee that calls to\n              mbedtls_platform_zeroize() are not removed by aggressive\n              compiler optimizations in a portable way. For this reason, Mbed\n              TLS provides the configuration option\n              MBEDTLS_PLATFORM_ZEROIZE_ALT, which allows users to configure\n              mbedtls_platform_zeroize() to use a suitable implementation for\n              their platform and needs\n\n \\param buf   Buffer to be zeroized\n \\param len   Length of the buffer in bytes\n"]
+    #[doc = " \\brief       Securely zeroize a buffer\n\n              The function is meant to \
+             wipe the data contained in a buffer so\n              that it can no longer be \
+             recovered even if the program memory\n              is later compromised. Call this \
+             function on sensitive data\n              stored on the stack before returning from a \
+             function, and on\n              sensitive data stored on the heap before freeing the \
+             heap\n              object.\n\n              It is extremely difficult to guarantee \
+             that calls to\n              mbedtls_platform_zeroize() are not removed by \
+             aggressive\n              compiler optimizations in a portable way. For this reason, \
+             Mbed\n              TLS provides the configuration option\n              \
+             MBEDTLS_PLATFORM_ZEROIZE_ALT, which allows users to configure\n              \
+             mbedtls_platform_zeroize() to use a suitable implementation for\n              their \
+             platform and needs\n\n \\param buf   Buffer to be zeroized\n \\param len   Length of \
+             the buffer in bytes\n"]
     pub fn mbedtls_platform_zeroize(buf: *mut ::std::os::raw::c_void, len: usize);
 }
 unsafe extern "C" {
@@ -950,28 +944,92 @@ unsafe extern "C" {
     pub fn mbedtls_platform_gmtime_r(tt: *const mbedtls_time_t, tm_buf: *mut tm) -> *mut tm;
 }
 pub type psa_status_t = i32;
-#[doc = " \\brief Encoding of a key type.\n\n Values of this type are generally constructed by macros called\n `PSA_KEY_TYPE_xxx`.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
+#[doc = " \\brief Encoding of a key type.\n\n Values of this type are generally constructed by \
+         macros called\n `PSA_KEY_TYPE_xxx`.\n\n \\note Values of this type are encoded in the \
+         persistent key store.\n       Any changes to existing values will require bumping the \
+         storage\n       format version and providing a translation when reading the old\n       \
+         format."]
 pub type psa_key_type_t = u16;
 #[doc = " The type of PSA elliptic curve family identifiers.\n\n Values of this type are generally constructed by macros called\n `PSA_ECC_FAMILY_xxx`.\n\n The curve identifier is required to create an ECC key using the\n PSA_KEY_TYPE_ECC_KEY_PAIR() or PSA_KEY_TYPE_ECC_PUBLIC_KEY()\n macros.\n\n Values defined by this standard will never be in the range 0x80-0xff.\n Vendors who define additional families must use an encoding in this range.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
 pub type psa_ecc_family_t = u8;
 #[doc = " The type of PSA Diffie-Hellman group family identifiers.\n\n Values of this type are generally constructed by macros called\n `PSA_DH_FAMILY_xxx`.\n\n The group identifier is required to create a Diffie-Hellman key using the\n PSA_KEY_TYPE_DH_KEY_PAIR() or PSA_KEY_TYPE_DH_PUBLIC_KEY()\n macros.\n\n Values defined by this standard will never be in the range 0x80-0xff.\n Vendors who define additional families must use an encoding in this range.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
 pub type psa_dh_family_t = u8;
-#[doc = " \\brief Encoding of a cryptographic algorithm.\n\n Values of this type are generally constructed by macros called\n `PSA_ALG_xxx`.\n\n For algorithms that can be applied to multiple key types, this type\n does not encode the key type. For example, for symmetric ciphers\n based on a block cipher, #psa_algorithm_t encodes the block cipher\n mode and the padding mode while the block cipher itself is encoded\n via #psa_key_type_t.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
+#[doc = " \\brief Encoding of a cryptographic algorithm.\n\n Values of this type are generally \
+         constructed by macros called\n `PSA_ALG_xxx`.\n\n For algorithms that can be applied to \
+         multiple key types, this type\n does not encode the key type. For example, for symmetric \
+         ciphers\n based on a block cipher, #psa_algorithm_t encodes the block cipher\n mode and \
+         the padding mode while the block cipher itself is encoded\n via #psa_key_type_t.\n\n \
+         \\note Values of this type are encoded in the persistent key store.\n       Any changes \
+         to existing values will require bumping the storage\n       format version and providing \
+         a translation when reading the old\n       format."]
 pub type psa_algorithm_t = u32;
-#[doc = " Encoding of key lifetimes.\n\n The lifetime of a key indicates where it is stored and what system actions\n may create and destroy it.\n\n Lifetime values have the following structure:\n - Bits 0-7 (#PSA_KEY_LIFETIME_GET_PERSISTENCE(\\c lifetime)):\n   persistence level. This value indicates what device management\n   actions can cause it to be destroyed. In particular, it indicates\n   whether the key is _volatile_ or _persistent_.\n   See ::psa_key_persistence_t for more information.\n - Bits 8-31 (#PSA_KEY_LIFETIME_GET_LOCATION(\\c lifetime)):\n   location indicator. This value indicates which part of the system\n   has access to the key material and can perform operations using the key.\n   See ::psa_key_location_t for more information.\n\n Volatile keys are automatically destroyed when the application instance\n terminates or on a power reset of the device. Persistent keys are\n preserved until the application explicitly destroys them or until an\n integration-specific device management event occurs (for example,\n a factory reset).\n\n Persistent keys have a key identifier of type #mbedtls_svc_key_id_t.\n This identifier remains valid throughout the lifetime of the key,\n even if the application instance that created the key terminates.\n The application can call psa_open_key() to open a persistent key that\n it created previously.\n\n The default lifetime of a key is #PSA_KEY_LIFETIME_VOLATILE. The lifetime\n #PSA_KEY_LIFETIME_PERSISTENT is supported if persistent storage is\n available. Other lifetime values may be supported depending on the\n library configuration.\n\n Values of this type are generally constructed by macros called\n `PSA_KEY_LIFETIME_xxx`.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
+#[doc = " Encoding of key lifetimes.\n\n The lifetime of a key indicates where it is stored and \
+         what system actions\n may create and destroy it.\n\n Lifetime values have the following \
+         structure:\n - Bits 0-7 (#PSA_KEY_LIFETIME_GET_PERSISTENCE(\\c lifetime)):\n   \
+         persistence level. This value indicates what device management\n   actions can cause it \
+         to be destroyed. In particular, it indicates\n   whether the key is _volatile_ or \
+         _persistent_.\n   See ::psa_key_persistence_t for more information.\n - Bits 8-31 \
+         (#PSA_KEY_LIFETIME_GET_LOCATION(\\c lifetime)):\n   location indicator. This value \
+         indicates which part of the system\n   has access to the key material and can perform \
+         operations using the key.\n   See ::psa_key_location_t for more information.\n\n Volatile \
+         keys are automatically destroyed when the application instance\n terminates or on a power \
+         reset of the device. Persistent keys are\n preserved until the application explicitly \
+         destroys them or until an\n integration-specific device management event occurs (for \
+         example,\n a factory reset).\n\n Persistent keys have a key identifier of type \
+         #mbedtls_svc_key_id_t.\n This identifier remains valid throughout the lifetime of the \
+         key,\n even if the application instance that created the key terminates.\n The \
+         application can call psa_open_key() to open a persistent key that\n it created \
+         previously.\n\n The default lifetime of a key is #PSA_KEY_LIFETIME_VOLATILE. The \
+         lifetime\n #PSA_KEY_LIFETIME_PERSISTENT is supported if persistent storage is\n \
+         available. Other lifetime values may be supported depending on the\n library \
+         configuration.\n\n Values of this type are generally constructed by macros called\n \
+         `PSA_KEY_LIFETIME_xxx`.\n\n \\note Values of this type are encoded in the persistent key \
+         store.\n       Any changes to existing values will require bumping the storage\n       \
+         format version and providing a translation when reading the old\n       format."]
 pub type psa_key_lifetime_t = u32;
-#[doc = " Encoding of key persistence levels.\n\n What distinguishes different persistence levels is what device management\n events may cause keys to be destroyed. _Volatile_ keys are destroyed\n by a power reset. Persistent keys may be destroyed by events such as\n a transfer of ownership or a factory reset. What management events\n actually affect persistent keys at different levels is outside the\n scope of the PSA Cryptography specification.\n\n The PSA Cryptography specification defines the following values of\n persistence levels:\n - \\c 0 = #PSA_KEY_PERSISTENCE_VOLATILE: volatile key.\n   A volatile key is automatically destroyed by the implementation when\n   the application instance terminates. In particular, a volatile key\n   is automatically destroyed on a power reset of the device.\n - \\c 1 = #PSA_KEY_PERSISTENCE_DEFAULT:\n   persistent key with a default lifetime.\n - \\c 2-254: currently not supported by Mbed TLS.\n - \\c 255 = #PSA_KEY_PERSISTENCE_READ_ONLY:\n   read-only or write-once key.\n   A key with this persistence level cannot be destroyed.\n   Mbed TLS does not currently offer a way to create such keys, but\n   integrations of Mbed TLS can use it for built-in keys that the\n   application cannot modify (for example, a hardware unique key (HUK)).\n\n \\note Key persistence levels are 8-bit values. Key management\n       interfaces operate on lifetimes (type ::psa_key_lifetime_t) which\n       encode the persistence as the lower 8 bits of a 32-bit value.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
+#[doc = " Encoding of key persistence levels.\n\n What distinguishes different persistence levels \
+         is what device management\n events may cause keys to be destroyed. _Volatile_ keys are \
+         destroyed\n by a power reset. Persistent keys may be destroyed by events such as\n a \
+         transfer of ownership or a factory reset. What management events\n actually affect \
+         persistent keys at different levels is outside the\n scope of the PSA Cryptography \
+         specification.\n\n The PSA Cryptography specification defines the following values of\n \
+         persistence levels:\n - \\c 0 = #PSA_KEY_PERSISTENCE_VOLATILE: volatile key.\n   A \
+         volatile key is automatically destroyed by the implementation when\n   the application \
+         instance terminates. In particular, a volatile key\n   is automatically destroyed on a \
+         power reset of the device.\n - \\c 1 = #PSA_KEY_PERSISTENCE_DEFAULT:\n   persistent key \
+         with a default lifetime.\n - \\c 2-254: currently not supported by Mbed TLS.\n - \\c 255 \
+         = #PSA_KEY_PERSISTENCE_READ_ONLY:\n   read-only or write-once key.\n   A key with this \
+         persistence level cannot be destroyed.\n   Mbed TLS does not currently offer a way to \
+         create such keys, but\n   integrations of Mbed TLS can use it for built-in keys that \
+         the\n   application cannot modify (for example, a hardware unique key (HUK)).\n\n \\note \
+         Key persistence levels are 8-bit values. Key management\n       interfaces operate on \
+         lifetimes (type ::psa_key_lifetime_t) which\n       encode the persistence as the lower 8 \
+         bits of a 32-bit value.\n\n \\note Values of this type are encoded in the persistent key \
+         store.\n       Any changes to existing values will require bumping the storage\n       \
+         format version and providing a translation when reading the old\n       format."]
 pub type psa_key_persistence_t = u8;
 #[doc = " Encoding of key location indicators.\n\n If an integration of Mbed TLS can make calls to external\n cryptoprocessors such as secure elements, the location of a key\n indicates which secure element performs the operations on the key.\n Depending on the design of the secure element, the key\n material may be stored either in the secure element, or\n in wrapped (encrypted) form alongside the key metadata in the\n primary local storage.\n\n The PSA Cryptography API specification defines the following values of\n location indicators:\n - \\c 0: primary local storage.\n   This location is always available.\n   The primary local storage is typically the same storage area that\n   contains the key metadata.\n - \\c 1: primary secure element.\n   Integrations of Mbed TLS should support this value if there is a secure\n   element attached to the operating environment.\n   As a guideline, secure elements may provide higher resistance against\n   side channel and physical attacks than the primary local storage, but may\n   have restrictions on supported key types, sizes, policies and operations\n   and may have different performance characteristics.\n - \\c 2-0x7fffff: other locations defined by a PSA specification.\n   The PSA Cryptography API does not currently assign any meaning to these\n   locations, but future versions of that specification or other PSA\n   specifications may do so.\n - \\c 0x800000-0xffffff: vendor-defined locations.\n   No PSA specification will assign a meaning to locations in this range.\n\n \\note Key location indicators are 24-bit values. Key management\n       interfaces operate on lifetimes (type ::psa_key_lifetime_t) which\n       encode the location as the upper 24 bits of a 32-bit value.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
 pub type psa_key_location_t = u32;
-#[doc = " Encoding of identifiers of persistent keys.\n\n - Applications may freely choose key identifiers in the range\n   #PSA_KEY_ID_USER_MIN to #PSA_KEY_ID_USER_MAX.\n - The implementation may define additional key identifiers in the range\n   #PSA_KEY_ID_VENDOR_MIN to #PSA_KEY_ID_VENDOR_MAX.\n - 0 is reserved as an invalid key identifier.\n - Key identifiers outside these ranges are reserved for future use.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to how values are allocated must require careful\n       consideration to allow backward compatibility."]
+#[doc = " Encoding of identifiers of persistent keys.\n\n - Applications may freely choose key \
+         identifiers in the range\n   #PSA_KEY_ID_USER_MIN to #PSA_KEY_ID_USER_MAX.\n - The \
+         implementation may define additional key identifiers in the range\n   \
+         #PSA_KEY_ID_VENDOR_MIN to #PSA_KEY_ID_VENDOR_MAX.\n - 0 is reserved as an invalid key \
+         identifier.\n - Key identifiers outside these ranges are reserved for future use.\n\n \
+         \\note Values of this type are encoded in the persistent key store.\n       Any changes \
+         to how values are allocated must require careful\n       consideration to allow backward \
+         compatibility."]
 pub type psa_key_id_t = u32;
 pub type mbedtls_svc_key_id_t = psa_key_id_t;
-#[doc = " \\brief Encoding of permitted usage on a key.\n\n Values of this type are generally constructed as bitwise-ors of macros\n called `PSA_KEY_USAGE_xxx`.\n\n \\note Values of this type are encoded in the persistent key store.\n       Any changes to existing values will require bumping the storage\n       format version and providing a translation when reading the old\n       format."]
+#[doc = " \\brief Encoding of permitted usage on a key.\n\n Values of this type are generally \
+         constructed as bitwise-ors of macros\n called `PSA_KEY_USAGE_xxx`.\n\n \\note Values of \
+         this type are encoded in the persistent key store.\n       Any changes to existing values \
+         will require bumping the storage\n       format version and providing a translation when \
+         reading the old\n       format."]
 pub type psa_key_usage_t = u32;
 #[doc = " The type of a structure containing key attributes.\n\n This is an opaque structure that can represent the metadata of a key\n object. Metadata that can be stored in attributes includes:\n - The location of the key in storage, indicated by its key identifier\n   and its lifetime.\n - The key's policy, comprising usage flags and a specification of\n   the permitted algorithm(s).\n - Information about the key itself: the key type and its size.\n - Additional implementation-defined attributes.\n\n The actual key material is not considered an attribute of a key.\n Key attributes do not contain information that is generally considered\n highly confidential.\n\n An attribute structure works like a simple data structure where each function\n `psa_set_key_xxx` sets a field and the corresponding function\n `psa_get_key_xxx` retrieves the value of the corresponding field.\n However, a future version of the library  may report values that are\n equivalent to the original one, but have a different encoding. Invalid\n values may be mapped to different, also invalid values.\n\n An attribute structure may contain references to auxiliary resources,\n for example pointers to allocated memory or indirect references to\n pre-calculated values. In order to free such resources, the application\n must call psa_reset_key_attributes(). As an exception, calling\n psa_reset_key_attributes() on an attribute structure is optional if\n the structure has only been modified by the following functions\n since it was initialized or last reset with psa_reset_key_attributes():\n - psa_set_key_id()\n - psa_set_key_lifetime()\n - psa_set_key_type()\n - psa_set_key_bits()\n - psa_set_key_usage_flags()\n - psa_set_key_algorithm()\n\n Before calling any function on a key attribute structure, the application\n must initialize it by any of the following means:\n - Set the structure to all-bits-zero, for example:\n   \\code\n   psa_key_attributes_t attributes;\n   memset(&attributes, 0, sizeof(attributes));\n   \\endcode\n - Initialize the structure to logical zero values, for example:\n   \\code\n   psa_key_attributes_t attributes = {0};\n   \\endcode\n - Initialize the structure to the initializer #PSA_KEY_ATTRIBUTES_INIT,\n   for example:\n   \\code\n   psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;\n   \\endcode\n - Assign the result of the function psa_key_attributes_init()\n   to the structure, for example:\n   \\code\n   psa_key_attributes_t attributes;\n   attributes = psa_key_attributes_init();\n   \\endcode\n\n A freshly initialized attribute structure contains the following\n values:\n\n - lifetime: #PSA_KEY_LIFETIME_VOLATILE.\n - key identifier: 0 (which is not a valid key identifier).\n - type: \\c 0 (meaning that the type is unspecified).\n - key size: \\c 0 (meaning that the size is unspecified).\n - usage flags: \\c 0 (which allows no usage except exporting a public key).\n - algorithm: \\c 0 (which allows no cryptographic usage, but allows\n   exporting).\n\n A typical sequence to create a key is as follows:\n -# Create and initialize an attribute structure.\n -# If the key is persistent, call psa_set_key_id().\n    Also call psa_set_key_lifetime() to place the key in a non-default\n    location.\n -# Set the key policy with psa_set_key_usage_flags() and\n    psa_set_key_algorithm().\n -# Set the key type with psa_set_key_type().\n    Skip this step if copying an existing key with psa_copy_key().\n -# When generating a random key with psa_generate_key() or deriving a key\n    with psa_key_derivation_output_key(), set the desired key size with\n    psa_set_key_bits().\n -# Call a key creation function: psa_import_key(), psa_generate_key(),\n    psa_key_derivation_output_key() or psa_copy_key(). This function reads\n    the attribute structure, creates a key with these attributes, and\n    outputs a key identifier to the newly created key.\n -# The attribute structure is now no longer necessary.\n    You may call psa_reset_key_attributes(), although this is optional\n    with the workflow presented here because the attributes currently\n    defined in this specification do not require any additional resources\n    beyond the structure itself.\n\n A typical sequence to query a key's attributes is as follows:\n -# Call psa_get_key_attributes().\n -# Call `psa_get_key_xxx` functions to retrieve the attribute(s) that\n    you are interested in.\n -# Call psa_reset_key_attributes() to free any resources that may be\n    used by the attribute structure.\n\n Once a key has been created, it is impossible to change its attributes."]
 pub type psa_key_attributes_t = psa_key_attributes_s;
-#[doc = " \\brief Encoding of the step of a key derivation.\n\n Values of this type are generally constructed by macros called\n `PSA_KEY_DERIVATION_INPUT_xxx`."]
+#[doc = " \\brief Encoding of the step of a key derivation.\n\n Values of this type are generally \
+         constructed by macros called\n `PSA_KEY_DERIVATION_INPUT_xxx`."]
 pub type psa_key_derivation_step_t = u16;
 #[doc = " \\brief Custom parameters for key generation or key derivation.\n\n This is a structure type with at least the following field:\n\n - \\c flags: an unsigned integer type. 0 for the default production parameters.\n\n Functions that take such a structure as input also take an associated\n input buffer \\c custom_data of length \\c custom_data_length.\n\n The interpretation of this structure and the associated \\c custom_data\n parameter depend on the type of the created key.\n\n - #PSA_KEY_TYPE_RSA_KEY_PAIR:\n     - \\c flags: must be 0.\n     - \\c custom_data: the public exponent, in little-endian order.\n       This must be an odd integer and must not be 1.\n       Implementations must support 65537, should support 3 and may\n       support other values.\n       When not using a driver, Mbed TLS supports values up to \\c INT_MAX.\n       If this is empty, the default value 65537 is used.\n - Other key types: reserved for future use. \\c flags must be 0."]
 pub type psa_custom_key_parameters_t = psa_custom_key_parameters_s;
@@ -984,7 +1042,12 @@ pub type mbedtls_t_udbl = u128;
 pub struct mbedtls_mpi {
     #[doc = " Pointer to limbs.\n\n This may be \\c NULL if \\c n is 0."]
     pub private_p: *mut mbedtls_mpi_uint,
-    #[doc = " Sign: -1 if the mpi is negative, 1 otherwise.\n\n The number 0 must be represented with `s = +1`. Although many library\n functions treat all-limbs-zero as equivalent to a valid representation\n of 0 regardless of the sign bit, there are exceptions, so bignum\n functions and external callers must always set \\c s to +1 for the\n number zero.\n\n Note that this implies that calloc() or `... = {0}` does not create\n a valid MPI representation. You must call mbedtls_mpi_init()."]
+    #[doc = " Sign: -1 if the mpi is negative, 1 otherwise.\n\n The number 0 must be represented \
+             with `s = +1`. Although many library\n functions treat all-limbs-zero as equivalent \
+             to a valid representation\n of 0 regardless of the sign bit, there are exceptions, \
+             so bignum\n functions and external callers must always set \\c s to +1 for the\n \
+             number zero.\n\n Note that this implies that calloc() or `... = {0}` does not \
+             create\n a valid MPI representation. You must call mbedtls_mpi_init()."]
     pub private_s: ::std::os::raw::c_short,
     #[doc = " Total number of limbs in \\c p."]
     pub private_n: ::std::os::raw::c_ushort,
@@ -1032,7 +1095,10 @@ pub const mbedtls_ecp_group_id_MBEDTLS_ECP_DP_SECP256K1: mbedtls_ecp_group_id = 
 pub const mbedtls_ecp_group_id_MBEDTLS_ECP_DP_CURVE448: mbedtls_ecp_group_id = 11;
 #[doc = "< Domain parameters for Ed25519."]
 pub const mbedtls_ecp_group_id_MBEDTLS_ECP_DP_ED25519: mbedtls_ecp_group_id = 12;
-#[doc = " Domain-parameter identifiers: curve, subgroup, and generator.\n\n \\note Only curves over prime fields are supported.\n\n \\warning This library does not support validation of arbitrary domain\n parameters. Therefore, only standardized domain parameters from trusted\n sources should be used. See mbedtls_ecp_group_load()."]
+#[doc = " Domain-parameter identifiers: curve, subgroup, and generator.\n\n \\note Only curves \
+         over prime fields are supported.\n\n \\warning This library does not support validation \
+         of arbitrary domain\n parameters. Therefore, only standardized domain parameters from \
+         trusted\n sources should be used. See mbedtls_ecp_group_load()."]
 pub type mbedtls_ecp_group_id = ::std::os::raw::c_uint;
 #[doc = " \\brief           The ECP point structure, in Jacobian coordinates.\n\n \\note            All functions expect and return points satisfying\n                  the following condition: <code>Z == 0</code> or\n                  <code>Z == 1</code>. Other values of \\p Z are\n                  used only by internal functions.\n                  The point is zero, or \"at infinity\", if <code>Z == 0</code>.\n                  Otherwise, \\p X and \\p Y are its standard (affine)\n                  coordinates."]
 #[repr(C)]
@@ -1062,7 +1128,10 @@ pub struct mbedtls_ecp_group {
     pub id: mbedtls_ecp_group_id,
     #[doc = "< The prime modulus of the base field."]
     pub P: mbedtls_mpi,
-    #[doc = "< For Short Weierstrass: \\p A in the equation. Note that\n\\p A is not set to the authentic value in some cases.\nRefer to detailed description of ::mbedtls_ecp_group if\nusing domain parameters in the structure.\nFor Montgomery curves: <code>(A + 2) / 4</code>."]
+    #[doc = "< For Short Weierstrass: \\p A in the equation. Note that\n\\p A is not set to the \
+             authentic value in some cases.\nRefer to detailed description of ::mbedtls_ecp_group \
+             if\nusing domain parameters in the structure.\nFor Montgomery curves: <code>(A + 2) \
+             / 4</code>."]
     pub A: mbedtls_mpi,
     #[doc = "< For Short Weierstrass: \\p B in the equation.\nFor Montgomery curves: unused."]
     pub B: mbedtls_mpi,
@@ -1072,7 +1141,8 @@ pub struct mbedtls_ecp_group {
     pub N: mbedtls_mpi,
     #[doc = "< The number of bits in \\p P."]
     pub pbits: usize,
-    #[doc = "< For Short Weierstrass: The number of bits in \\p P.\nFor Montgomery curves: the number of bits in the\nprivate keys."]
+    #[doc = "< For Short Weierstrass: The number of bits in \\p P.\nFor Montgomery curves: the \
+             number of bits in the\nprivate keys."]
     pub nbits: usize,
     #[doc = "< \\internal 1 if the constants are static."]
     pub private_h: ::std::os::raw::c_uint,
@@ -1111,7 +1181,9 @@ impl Default for mbedtls_ecp_group {
     }
 }
 pub type mbedtls_ecp_restart_ctx = ::std::os::raw::c_void;
-#[doc = " \\brief    The ECP key-pair structure.\n\n A generic key-pair that may be used for ECDSA and fixed ECDH, for example.\n\n \\note    Members are deliberately in the same order as in the\n          ::mbedtls_ecdsa_context structure."]
+#[doc = " \\brief    The ECP key-pair structure.\n\n A generic key-pair that may be used for ECDSA \
+         and fixed ECDH, for example.\n\n \\note    Members are deliberately in the same order as \
+         in the\n          ::mbedtls_ecdsa_context structure."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_ecp_keypair {
@@ -1155,7 +1227,9 @@ pub const mbedtls_md_type_t_MBEDTLS_MD_SHA3_256: mbedtls_md_type_t = 17;
 pub const mbedtls_md_type_t_MBEDTLS_MD_SHA3_384: mbedtls_md_type_t = 18;
 #[doc = "< The SHA3-512 message digest."]
 pub const mbedtls_md_type_t_MBEDTLS_MD_SHA3_512: mbedtls_md_type_t = 19;
-#[doc = " \\brief     Supported message digests.\n\n \\warning   MD5 and SHA-1 are considered weak message digests and\n            their use constitutes a security risk. We recommend considering\n            stronger message digests instead.\n"]
+#[doc = " \\brief     Supported message digests.\n\n \\warning   MD5 and SHA-1 are considered weak \
+         message digests and\n            their use constitutes a security risk. We recommend \
+         considering\n            stronger message digests instead.\n"]
 pub type mbedtls_md_type_t = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1252,7 +1326,9 @@ pub const psa_encrypt_or_decrypt_t_PSA_CRYPTO_DRIVER_DECRYPT: psa_encrypt_or_dec
 pub const psa_encrypt_or_decrypt_t_PSA_CRYPTO_DRIVER_ENCRYPT: psa_encrypt_or_decrypt_t = 1;
 #[doc = " For encrypt-decrypt functions, whether the operation is an encryption\n or a decryption."]
 pub type psa_encrypt_or_decrypt_t = ::std::os::raw::c_uint;
-#[doc = " \\brief          MD5 context structure\n\n \\warning        MD5 is considered a weak message digest and its use\n                 constitutes a security risk. We recommend considering\n                 stronger message digests instead.\n"]
+#[doc = " \\brief          MD5 context structure\n\n \\warning        MD5 is considered a weak \
+         message digest and its use\n                 constitutes a security risk. We recommend \
+         considering\n                 stronger message digests instead.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_md5_context {
@@ -1292,7 +1368,9 @@ impl Default for mbedtls_ripemd160_context {
         }
     }
 }
-#[doc = " \\brief          The SHA-1 context structure.\n\n \\warning        SHA-1 is considered a weak message digest and its use\n                 constitutes a security risk. We recommend considering\n                 stronger message digests instead.\n"]
+#[doc = " \\brief          The SHA-1 context structure.\n\n \\warning        SHA-1 is considered a \
+         weak message digest and its use\n                 constitutes a security risk. We \
+         recommend considering\n                 stronger message digests instead.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_sha1_context {
@@ -1312,7 +1390,9 @@ impl Default for mbedtls_sha1_context {
         }
     }
 }
-#[doc = " \\brief          The SHA-256 context structure.\n\n                 The structure is used both for SHA-256 and for SHA-224\n                 checksum calculations. The choice between these two is\n                 made in the call to mbedtls_sha256_starts()."]
+#[doc = " \\brief          The SHA-256 context structure.\n\n                 The structure is \
+         used both for SHA-256 and for SHA-224\n                 checksum calculations. The choice \
+         between these two is\n                 made in the call to mbedtls_sha256_starts()."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_sha256_context {
@@ -1334,7 +1414,9 @@ impl Default for mbedtls_sha256_context {
         }
     }
 }
-#[doc = " \\brief          The SHA-512 context structure.\n\n                 The structure is used both for SHA-384 and for SHA-512\n                 checksum calculations. The choice between these two is\n                 made in the call to mbedtls_sha512_starts()."]
+#[doc = " \\brief          The SHA-512 context structure.\n\n                 The structure is \
+         used both for SHA-384 and for SHA-512\n                 checksum calculations. The choice \
+         between these two is\n                 made in the call to mbedtls_sha512_starts()."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_sha512_context {
@@ -1356,7 +1438,8 @@ impl Default for mbedtls_sha512_context {
         }
     }
 }
-#[doc = " \\brief          The SHA-3 context structure.\n\n                 The structure is used SHA-3 checksum calculations."]
+#[doc = " \\brief          The SHA-3 context structure.\n\n                 The structure is used \
+         SHA-3 checksum calculations."]
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct mbedtls_sha3_context {
@@ -1934,7 +2017,8 @@ pub struct mbedtls_cipher_context_t {
     pub private_unprocessed_data: [::std::os::raw::c_uchar; 16usize],
     #[doc = " Number of Bytes that have not been processed yet."]
     pub private_unprocessed_len: usize,
-    #[doc = " Current IV or NONCE_COUNTER for CTR-mode, data unit (or sector) number\n for XTS-mode."]
+    #[doc = " Current IV or NONCE_COUNTER for CTR-mode, data unit (or sector) number\n for \
+             XTS-mode."]
     pub private_iv: [::std::os::raw::c_uchar; 16usize],
     #[doc = " IV size in Bytes, for ciphers with variable-length IVs."]
     pub private_iv_size: usize,
@@ -1942,7 +2026,10 @@ pub struct mbedtls_cipher_context_t {
     pub private_cipher_ctx: *mut ::std::os::raw::c_void,
     #[doc = " CMAC-specific context."]
     pub private_cmac_ctx: *mut mbedtls_cmac_context_t,
-    #[doc = " Indicates whether the cipher operations should be performed\n  by Mbed TLS' own crypto library or an external implementation\n  of the PSA Crypto API.\n  This is unset if the cipher context was established through\n  mbedtls_cipher_setup(), and set if it was established through\n  mbedtls_cipher_setup_psa()."]
+    #[doc = " Indicates whether the cipher operations should be performed\n  by Mbed TLS' own \
+             crypto library or an external implementation\n  of the PSA Crypto API.\n  This is \
+             unset if the cipher context was established through\n  mbedtls_cipher_setup(), and \
+             set if it was established through\n  mbedtls_cipher_setup_psa()."]
     pub private_psa_enabled: ::std::os::raw::c_uchar,
 }
 impl Default for mbedtls_cipher_context_t {
@@ -2019,7 +2106,11 @@ impl Default for psa_driver_cipher_context_t {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_hash_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_driver_wrappers.h.\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. the driver context is not active, in use)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_driver_wrappers.h.\n ID value \
+             zero means the context is not valid or not assigned to\n any driver (i.e. the driver \
+             context is not active, in use)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_ctx: psa_driver_hash_context_t,
 }
@@ -2035,7 +2126,11 @@ impl Default for psa_hash_operation_s {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_cipher_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub _bitfield_align_1: [u8; 0],
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
@@ -2167,7 +2262,8 @@ impl Default for mbedtls_gcm_context {
         }
     }
 }
-#[doc = " \\brief    The CCM context-type definition. The CCM context is passed\n           to the APIs called."]
+#[doc = " \\brief    The CCM context-type definition. The CCM context is passed\n           to the \
+         APIs called."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_ccm_context {
@@ -2181,11 +2277,14 @@ pub struct mbedtls_ccm_context {
     pub private_add_len: usize,
     #[doc = "< Total tag length"]
     pub private_tag_len: usize,
-    #[doc = "< Track how many bytes of input data\nwere processed (chunked input).\nUsed independently for both auth data\nand plaintext/ciphertext.\nThis variable is set to zero after\nauth data input is finished."]
+    #[doc = "< Track how many bytes of input data\nwere processed (chunked input).\nUsed \
+             independently for both auth data\nand plaintext/ciphertext.\nThis variable is set to \
+             zero after\nauth data input is finished."]
     pub private_processed: usize,
     #[doc = "< The Q working value"]
     pub private_q: ::std::os::raw::c_uint,
-    #[doc = "< The operation to perform:\nMBEDTLS_CCM_ENCRYPT or\nMBEDTLS_CCM_DECRYPT or\nMBEDTLS_CCM_STAR_ENCRYPT or\nMBEDTLS_CCM_STAR_DECRYPT."]
+    #[doc = "< The operation to perform:\nMBEDTLS_CCM_ENCRYPT or\nMBEDTLS_CCM_DECRYPT \
+             or\nMBEDTLS_CCM_STAR_ENCRYPT or\nMBEDTLS_CCM_STAR_DECRYPT."]
     pub private_mode: ::std::os::raw::c_uint,
     #[doc = "< The cipher context used."]
     pub private_cipher_ctx: mbedtls_cipher_context_t,
@@ -2266,9 +2365,12 @@ impl Default for mbedtls_chachapoly_context {
 pub const mbedtls_ecdh_variant_MBEDTLS_ECDH_VARIANT_NONE: mbedtls_ecdh_variant = 0;
 #[doc = "< The default Mbed TLS implementation"]
 pub const mbedtls_ecdh_variant_MBEDTLS_ECDH_VARIANT_MBEDTLS_2_0: mbedtls_ecdh_variant = 1;
-#[doc = " Defines the ECDH implementation used.\n\n Later versions of the library may add new variants, therefore users should\n not make any assumptions about them."]
+#[doc = " Defines the ECDH implementation used.\n\n Later versions of the library may add new \
+         variants, therefore users should\n not make any assumptions about them."]
 pub type mbedtls_ecdh_variant = ::std::os::raw::c_uint;
-#[doc = " The context used by the default ECDH implementation.\n\n Later versions might change the structure of this context, therefore users\n should not make any assumptions about the structure of\n mbedtls_ecdh_context_mbed."]
+#[doc = " The context used by the default ECDH implementation.\n\n Later versions might change the \
+         structure of this context, therefore users\n should not make any assumptions about the \
+         structure of\n mbedtls_ecdh_context_mbed."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_ecdh_context_mbed {
@@ -2302,7 +2404,8 @@ pub struct mbedtls_ecdh_context {
     pub private_grp_id: mbedtls_ecp_group_id,
     #[doc = "< The ECDH implementation/structure used."]
     pub private_var: mbedtls_ecdh_variant,
-    #[doc = "< Implementation-specific context. The\ncontext in use is specified by the \\c var\nfield."]
+    #[doc = "< Implementation-specific context. The\ncontext in use is specified by the \\c \
+             var\nfield."]
     pub private_ctx: mbedtls_ecdh_context__bindgen_ty_1,
 }
 #[repr(C)]
@@ -2481,7 +2584,11 @@ pub const mbedtls_ecjpake_role_MBEDTLS_ECJPAKE_SERVER: mbedtls_ecjpake_role = 1;
 pub const mbedtls_ecjpake_role_MBEDTLS_ECJPAKE_NONE: mbedtls_ecjpake_role = 2;
 #[doc = " Roles in the EC J-PAKE exchange"]
 pub type mbedtls_ecjpake_role = ::std::os::raw::c_uint;
-#[doc = " EC J-PAKE context structure.\n\n J-PAKE is a symmetric protocol, except for the identifiers used in\n Zero-Knowledge Proofs, and the serialization of the second message\n (KeyExchange) as defined by the Thread spec.\n\n In order to benefit from this symmetry, we choose a different naming\n convention from the Thread v1.0 spec. Correspondence is indicated in the\n description as a pair C: client name, S: server name"]
+#[doc = " EC J-PAKE context structure.\n\n J-PAKE is a symmetric protocol, except for the \
+         identifiers used in\n Zero-Knowledge Proofs, and the serialization of the second \
+         message\n (KeyExchange) as defined by the Thread spec.\n\n In order to benefit from this \
+         symmetry, we choose a different naming\n convention from the Thread v1.0 spec. \
+         Correspondence is indicated in the\n description as a pair C: client name, S: server name"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_ecjpake_context {
@@ -2658,7 +2765,11 @@ impl Default for psa_driver_pake_context_t {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_mac_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_driver_wrappers.h\n ID value \
+             zero means the context is not valid or not assigned to\n any driver (i.e. none of \
+             the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_mac_size: u8,
     pub _bitfield_align_1: [u8; 0],
@@ -2723,7 +2834,11 @@ impl psa_mac_operation_s {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_aead_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_alg: psa_algorithm_t,
     pub private_key_type: psa_key_type_t,
@@ -3234,7 +3349,11 @@ pub struct psa_key_attributes_s {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_sign_hash_interruptible_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_ctx: psa_driver_sign_hash_interruptible_context_t,
     pub _bitfield_align_1: [u8; 0],
@@ -3301,7 +3420,11 @@ impl psa_sign_hash_interruptible_operation_s {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_verify_hash_interruptible_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_ctx: psa_driver_verify_hash_interruptible_context_t,
     pub _bitfield_align_1: [u8; 0],
@@ -3368,7 +3491,11 @@ impl psa_verify_hash_interruptible_operation_s {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct psa_key_agreement_iop_s {
-    #[doc = "  Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = "  Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_mbedtls_ctx: mbedtls_psa_key_agreement_interruptible_operation_t,
     pub private_num_ops: u32,
@@ -3428,7 +3555,11 @@ impl psa_key_agreement_iop_s {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct psa_generate_key_iop_s {
-    #[doc = "  Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = "  Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_ctx: mbedtls_psa_generate_key_iop_t,
     pub private_attributes: psa_key_attributes_t,
@@ -3496,7 +3627,11 @@ impl psa_generate_key_iop_s {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct psa_export_public_key_iop_s {
-    #[doc = "  Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = "  Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_ctx: mbedtls_psa_export_public_key_iop_t,
     pub _bitfield_align_1: [u8; 0],
@@ -3551,7 +3686,24 @@ impl psa_export_public_key_iop_s {
     }
 }
 unsafe extern "C" {
-    #[doc = " \\brief Library initialization.\n\n Applications must call this function before calling any other\n function in this module.\n\n Applications may call this function more than once. Once a call\n succeeds, subsequent calls are guaranteed to succeed.\n\n If the application calls other functions before calling psa_crypto_init(),\n the behavior is undefined. Implementations are encouraged to either perform\n the operation as if the library had been initialized or to return\n #PSA_ERROR_BAD_STATE or some other applicable error. In particular,\n implementations should not return a success status if the lack of\n initialization may have security implications, for example due to improper\n seeding of the random number generator.\n\n \\retval #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_INSUFFICIENT_MEMORY \\emptydescription\n \\retval #PSA_ERROR_INSUFFICIENT_STORAGE \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval #PSA_ERROR_INSUFFICIENT_ENTROPY \\emptydescription\n \\retval #PSA_ERROR_STORAGE_FAILURE \\emptydescription\n \\retval #PSA_ERROR_DATA_INVALID \\emptydescription\n \\retval #PSA_ERROR_DATA_CORRUPT \\emptydescription"]
+    #[doc = " \\brief Library initialization.\n\n Applications must call this function before \
+             calling any other\n function in this module.\n\n Applications may call this function \
+             more than once. Once a call\n succeeds, subsequent calls are guaranteed to \
+             succeed.\n\n If the application calls other functions before calling \
+             psa_crypto_init(),\n the behavior is undefined. Implementations are encouraged to \
+             either perform\n the operation as if the library had been initialized or to return\n \
+             #PSA_ERROR_BAD_STATE or some other applicable error. In particular,\n implementations \
+             should not return a success status if the lack of\n initialization may have security \
+             implications, for example due to improper\n seeding of the random number \
+             generator.\n\n \\retval #PSA_SUCCESS \\emptydescription\n \\retval \
+             #PSA_ERROR_INSUFFICIENT_MEMORY \\emptydescription\n \\retval \
+             #PSA_ERROR_INSUFFICIENT_STORAGE \\emptydescription\n \\retval \
+             #PSA_ERROR_COMMUNICATION_FAILURE \\emptydescription\n \\retval \
+             #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \\retval \
+             #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval \
+             #PSA_ERROR_INSUFFICIENT_ENTROPY \\emptydescription\n \\retval \
+             #PSA_ERROR_STORAGE_FAILURE \\emptydescription\n \\retval #PSA_ERROR_DATA_INVALID \
+             \\emptydescription\n \\retval #PSA_ERROR_DATA_CORRUPT \\emptydescription"]
     pub fn psa_crypto_init() -> psa_status_t;
 }
 unsafe extern "C" {
@@ -3566,7 +3718,17 @@ unsafe extern "C" {
     pub fn psa_reset_key_attributes(attributes: *mut psa_key_attributes_t);
 }
 unsafe extern "C" {
-    #[doc = " Remove non-essential copies of key material from memory.\n\n If the key identifier designates a volatile key, this functions does not do\n anything and returns successfully.\n\n If the key identifier designates a persistent key, then this function will\n free all resources associated with the key in volatile memory. The key\n data in persistent storage is not affected and the key can still be used.\n\n \\param key Identifier of the key to purge.\n\n \\retval #PSA_SUCCESS\n         The key material will have been removed from memory if it is not\n         currently required.\n \\retval #PSA_ERROR_INVALID_ARGUMENT\n         \\p key is not a valid key identifier.\n \\retval #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by psa_crypto_init().\n         It is implementation-dependent whether a failure to initialize\n         results in this error code."]
+    #[doc = " Remove non-essential copies of key material from memory.\n\n If the key identifier \
+             designates a volatile key, this functions does not do\n anything and returns \
+             successfully.\n\n If the key identifier designates a persistent key, then this \
+             function will\n free all resources associated with the key in volatile memory. The \
+             key\n data in persistent storage is not affected and the key can still be used.\n\n \
+             \\param key Identifier of the key to purge.\n\n \\retval #PSA_SUCCESS\n         The \
+             key material will have been removed from memory if it is not\n         currently \
+             required.\n \\retval #PSA_ERROR_INVALID_ARGUMENT\n         \\p key is not a valid key \
+             identifier.\n \\retval #PSA_ERROR_BAD_STATE\n         The library has not been \
+             previously initialized by psa_crypto_init().\n         It is implementation-dependent \
+             whether a failure to initialize\n         results in this error code."]
     pub fn psa_purge_key(key: mbedtls_svc_key_id_t) -> psa_status_t;
 }
 unsafe extern "C" {
@@ -3664,7 +3826,20 @@ unsafe extern "C" {
     ) -> psa_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Abort a hash operation.\n\n Aborting an operation frees all associated resources except for the\n \\p operation structure itself. Once aborted, the operation object\n can be reused for another operation by calling\n psa_hash_setup() again.\n\n You may call this function any time after the operation object has\n been initialized by one of the methods described in #psa_hash_operation_t.\n\n In particular, calling psa_hash_abort() after the operation has been\n terminated by a call to psa_hash_abort(), psa_hash_finish() or\n psa_hash_verify() is safe and has no effect.\n\n \\param[in,out] operation     Initialized hash operation.\n\n \\retval #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by psa_crypto_init().\n         It is implementation-dependent whether a failure to initialize\n         results in this error code."]
+    #[doc = " Abort a hash operation.\n\n Aborting an operation frees all associated resources \
+             except for the\n \\p operation structure itself. Once aborted, the operation object\n \
+             can be reused for another operation by calling\n psa_hash_setup() again.\n\n You may \
+             call this function any time after the operation object has\n been initialized by one \
+             of the methods described in #psa_hash_operation_t.\n\n In particular, calling \
+             psa_hash_abort() after the operation has been\n terminated by a call to \
+             psa_hash_abort(), psa_hash_finish() or\n psa_hash_verify() is safe and has no \
+             effect.\n\n \\param[in,out] operation     Initialized hash operation.\n\n \\retval \
+             #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \
+             \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \
+             \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval \
+             #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by \
+             psa_crypto_init().\n         It is implementation-dependent whether a failure to \
+             initialize\n         results in this error code."]
     pub fn psa_hash_abort(operation: *mut psa_hash_operation_t) -> psa_status_t;
 }
 unsafe extern "C" {
@@ -3824,7 +3999,20 @@ unsafe extern "C" {
     ) -> psa_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Abort a cipher operation.\n\n Aborting an operation frees all associated resources except for the\n \\p operation structure itself. Once aborted, the operation object\n can be reused for another operation by calling\n psa_cipher_encrypt_setup() or psa_cipher_decrypt_setup() again.\n\n You may call this function any time after the operation object has\n been initialized as described in #psa_cipher_operation_t.\n\n In particular, calling psa_cipher_abort() after the operation has been\n terminated by a call to psa_cipher_abort() or psa_cipher_finish()\n is safe and has no effect.\n\n \\param[in,out] operation     Initialized cipher operation.\n\n \\retval #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by psa_crypto_init().\n         It is implementation-dependent whether a failure to initialize\n         results in this error code."]
+    #[doc = " Abort a cipher operation.\n\n Aborting an operation frees all associated resources \
+             except for the\n \\p operation structure itself. Once aborted, the operation object\n \
+             can be reused for another operation by calling\n psa_cipher_encrypt_setup() or \
+             psa_cipher_decrypt_setup() again.\n\n You may call this function any time after the \
+             operation object has\n been initialized as described in #psa_cipher_operation_t.\n\n \
+             In particular, calling psa_cipher_abort() after the operation has been\n terminated \
+             by a call to psa_cipher_abort() or psa_cipher_finish()\n is safe and has no \
+             effect.\n\n \\param[in,out] operation     Initialized cipher operation.\n\n \\retval \
+             #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \
+             \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \
+             \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval \
+             #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by \
+             psa_crypto_init().\n         It is implementation-dependent whether a failure to \
+             initialize\n         results in this error code."]
     pub fn psa_cipher_abort(operation: *mut psa_cipher_operation_t) -> psa_status_t;
 }
 unsafe extern "C" {
@@ -3945,7 +4133,20 @@ unsafe extern "C" {
     ) -> psa_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Abort an AEAD operation.\n\n Aborting an operation frees all associated resources except for the\n \\p operation structure itself. Once aborted, the operation object\n can be reused for another operation by calling\n psa_aead_encrypt_setup() or psa_aead_decrypt_setup() again.\n\n You may call this function any time after the operation object has\n been initialized as described in #psa_aead_operation_t.\n\n In particular, calling psa_aead_abort() after the operation has been\n terminated by a call to psa_aead_abort(), psa_aead_finish() or\n psa_aead_verify() is safe and has no effect.\n\n \\param[in,out] operation     Initialized AEAD operation.\n\n \\retval #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by psa_crypto_init().\n         It is implementation-dependent whether a failure to initialize\n         results in this error code."]
+    #[doc = " Abort an AEAD operation.\n\n Aborting an operation frees all associated resources \
+             except for the\n \\p operation structure itself. Once aborted, the operation object\n \
+             can be reused for another operation by calling\n psa_aead_encrypt_setup() or \
+             psa_aead_decrypt_setup() again.\n\n You may call this function any time after the \
+             operation object has\n been initialized as described in #psa_aead_operation_t.\n\n In \
+             particular, calling psa_aead_abort() after the operation has been\n terminated by a \
+             call to psa_aead_abort(), psa_aead_finish() or\n psa_aead_verify() is safe and has no \
+             effect.\n\n \\param[in,out] operation     Initialized AEAD operation.\n\n \\retval \
+             #PSA_SUCCESS \\emptydescription\n \\retval #PSA_ERROR_COMMUNICATION_FAILURE \
+             \\emptydescription\n \\retval #PSA_ERROR_HARDWARE_FAILURE \\emptydescription\n \
+             \\retval #PSA_ERROR_CORRUPTION_DETECTED \\emptydescription\n \\retval \
+             #PSA_ERROR_BAD_STATE\n         The library has not been previously initialized by \
+             psa_crypto_init().\n         It is implementation-dependent whether a failure to \
+             initialize\n         results in this error code."]
     pub fn psa_aead_abort(operation: *mut psa_aead_operation_t) -> psa_status_t;
 }
 unsafe extern "C" {
@@ -4171,9 +4372,39 @@ unsafe extern "C" {
         key: *mut mbedtls_svc_key_id_t,
     ) -> psa_status_t;
 }
-#[doc = " The type of the state data structure for interruptible hash\n  signing operations.\n\n Before calling any function on a sign hash operation object, the\n application must initialize it by any of the following means:\n - Set the structure to all-bits-zero, for example:\n   \\code\n   psa_sign_hash_interruptible_operation_t operation;\n   memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the structure to logical zero values, for example:\n   \\code\n   psa_sign_hash_interruptible_operation_t operation = {0};\n   \\endcode\n - Initialize the structure to the initializer\n   #PSA_SIGN_HASH_INTERRUPTIBLE_OPERATION_INIT, for example:\n   \\code\n   psa_sign_hash_interruptible_operation_t operation =\n   PSA_SIGN_HASH_INTERRUPTIBLE_OPERATION_INIT;\n   \\endcode\n - Assign the result of the function\n   psa_sign_hash_interruptible_operation_init() to the structure, for\n   example:\n   \\code\n   psa_sign_hash_interruptible_operation_t operation;\n   operation = psa_sign_hash_interruptible_operation_init();\n   \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n make any assumptions about the content of this structure.\n Implementation details can change in future versions without notice."]
+#[doc = " The type of the state data structure for interruptible hash\n  signing operations.\n\n \
+         Before calling any function on a sign hash operation object, the\n application must \
+         initialize it by any of the following means:\n - Set the structure to all-bits-zero, for \
+         example:\n   \\code\n   psa_sign_hash_interruptible_operation_t operation;\n   \
+         memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the structure to \
+         logical zero values, for example:\n   \\code\n   psa_sign_hash_interruptible_operation_t \
+         operation = {0};\n   \\endcode\n - Initialize the structure to the initializer\n   \
+         #PSA_SIGN_HASH_INTERRUPTIBLE_OPERATION_INIT, for example:\n   \\code\n   \
+         psa_sign_hash_interruptible_operation_t operation =\n   \
+         PSA_SIGN_HASH_INTERRUPTIBLE_OPERATION_INIT;\n   \\endcode\n - Assign the result of the \
+         function\n   psa_sign_hash_interruptible_operation_init() to the structure, for\n   \
+         example:\n   \\code\n   psa_sign_hash_interruptible_operation_t operation;\n   operation \
+         = psa_sign_hash_interruptible_operation_init();\n   \\endcode\n\n This is an \
+         implementation-defined \\c struct. Applications should not\n make any assumptions about \
+         the content of this structure.\n Implementation details can change in future versions \
+         without notice."]
 pub type psa_sign_hash_interruptible_operation_t = psa_sign_hash_interruptible_operation_s;
-#[doc = " The type of the state data structure for interruptible hash\n  verification operations.\n\n Before calling any function on a sign hash operation object, the\n application must initialize it by any of the following means:\n - Set the structure to all-bits-zero, for example:\n   \\code\n   psa_verify_hash_interruptible_operation_t operation;\n   memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the structure to logical zero values, for example:\n   \\code\n   psa_verify_hash_interruptible_operation_t operation = {0};\n   \\endcode\n - Initialize the structure to the initializer\n   #PSA_VERIFY_HASH_INTERRUPTIBLE_OPERATION_INIT, for example:\n   \\code\n   psa_verify_hash_interruptible_operation_t operation =\n   PSA_VERIFY_HASH_INTERRUPTIBLE_OPERATION_INIT;\n   \\endcode\n - Assign the result of the function\n   psa_verify_hash_interruptible_operation_init() to the structure, for\n   example:\n   \\code\n   psa_verify_hash_interruptible_operation_t operation;\n   operation = psa_verify_hash_interruptible_operation_init();\n   \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n make any assumptions about the content of this structure.\n Implementation details can change in future versions without notice."]
+#[doc = " The type of the state data structure for interruptible hash\n  verification \
+         operations.\n\n Before calling any function on a sign hash operation object, the\n \
+         application must initialize it by any of the following means:\n - Set the structure to \
+         all-bits-zero, for example:\n   \\code\n   psa_verify_hash_interruptible_operation_t \
+         operation;\n   memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the \
+         structure to logical zero values, for example:\n   \\code\n   \
+         psa_verify_hash_interruptible_operation_t operation = {0};\n   \\endcode\n - Initialize \
+         the structure to the initializer\n   #PSA_VERIFY_HASH_INTERRUPTIBLE_OPERATION_INIT, for \
+         example:\n   \\code\n   psa_verify_hash_interruptible_operation_t operation =\n   \
+         PSA_VERIFY_HASH_INTERRUPTIBLE_OPERATION_INIT;\n   \\endcode\n - Assign the result of the \
+         function\n   psa_verify_hash_interruptible_operation_init() to the structure, for\n   \
+         example:\n   \\code\n   psa_verify_hash_interruptible_operation_t operation;\n   \
+         operation = psa_verify_hash_interruptible_operation_init();\n   \\endcode\n\n This is an \
+         implementation-defined \\c struct. Applications should not\n make any assumptions about \
+         the content of this structure.\n Implementation details can change in future versions \
+         without notice."]
 pub type psa_verify_hash_interruptible_operation_t = psa_verify_hash_interruptible_operation_s;
 unsafe extern "C" {
     #[doc = " \\brief                       Set the maximum number of ops allowed to be\n                              executed by an interruptible function in a\n                              single call.\n\n \\warning                     This is a beta API, and thus subject to change\n                              at any point. It is not bound by the usual\n                              interface stability promises.\n\n \\note                        The time taken to execute a single op is\n                              implementation specific and depends on\n                              software, hardware, the algorithm, key type and\n                              curve chosen. Even within a single operation,\n                              successive ops can take differing amounts of\n                              time. The only guarantee is that lower values\n                              for \\p max_ops means functions will block for a\n                              lesser maximum amount of time. The functions\n                              \\c psa_sign_interruptible_get_num_ops(),\n                              \\c psa_verify_interruptible_get_num_ops() and\n                              \\c psa_generate_key_iop_get_num_ops() are\n                              provided to help with tuning this value.\n\n \\note                        This value defaults to\n                              #PSA_INTERRUPTIBLE_MAX_OPS_UNLIMITED, which\n                              means the whole operation will be done in one\n                              go, regardless of the number of ops required.\n\n \\note                        If more ops are needed to complete a\n                              computation, #PSA_OPERATION_INCOMPLETE will be\n                              returned by the function performing the\n                              computation. It is then the caller's\n                              responsibility to either call again with the\n                              same operation context until it returns 0 or an\n                              error code; or to call the relevant abort\n                              function if the answer is no longer required.\n\n \\note                        The interpretation of \\p max_ops is also\n                              implementation defined. On a hard real time\n                              system, this can indicate a hard deadline, as a\n                              real-time system needs a guarantee of not\n                              spending more than X time, however care must be\n                              taken in such an implementation to avoid the\n                              situation whereby calls just return, not being\n                              able to do any actual work within the allotted\n                              time.  On a non-real-time system, the\n                              implementation can be more relaxed, but again\n                              whether this number should be interpreted as as\n                              hard or soft limit or even whether a less than\n                              or equals as regards to ops executed in a\n                              single call is implementation defined.\n\n \\note                        For keys in local storage when no accelerator\n                              driver applies, please see also the\n                              documentation for \\c mbedtls_ecp_set_max_ops(),\n                              which is the internal implementation in these\n                              cases.\n\n \\warning                     With implementations that interpret this number\n                              as a hard limit, setting this number too small\n                              may result in an infinite loop, whereby each\n                              call results in immediate return with no ops\n                              done (as there is not enough time to execute\n                              any), and thus no result will ever be achieved.\n\n \\note                        This only applies to functions whose\n                              documentation mentions they may return\n                              #PSA_OPERATION_INCOMPLETE.\n\n \\param max_ops               The maximum number of ops to be executed in a\n                              single call. This can be a number from 0 to\n                              #PSA_INTERRUPTIBLE_MAX_OPS_UNLIMITED, where 0\n                              is the least amount of work done per call."]
@@ -4272,7 +4503,20 @@ unsafe extern "C" {
     #[doc = " \\brief                       Abort a key agreement operation.\n\n \\warning                     This is a beta API, and thus subject to change\n                              at any point. It is not bound by the usual\n                              interface stability promises.\n\n \\note                        This function clears the number of ops completed\n                              as part of the operation. Please ensure you copy\n                              this value via\n                              \\c psa_key_agreement_iop_get_num_ops() if\n                              required before calling.\n\n \\note                        Aborting an operation frees all\n                              associated resources except for the operation\n                              structure itself. Once aborted, the operation\n                              object can be reused for another operation by\n                              calling \\c psa_key_agreement_iop_setup() again.\n\n \\note                        You may call this function any time after the\n                              operation object has been initialized.\n                              In particular, calling \\c\n                              psa_key_agreement_iop_abort() after the\n                              operation has already been terminated by a call\n                              to \\c psa_key_agreement_iop_abort() or\n                              psa_key_agreement_iop_complete() is safe.\n\n \\param[in,out] operation     The \\c psa_key_agreement_iop_t to use\n\n \\retval #PSA_SUCCESS\n          The operation was aborted successfully.\n \\retval #PSA_ERROR_BAD_STATE\n          The library has not been previously initialized by\n          \\c psa_crypto_init()."]
     pub fn psa_key_agreement_iop_abort(operation: *mut psa_key_agreement_iop_t) -> psa_status_t;
 }
-#[doc = "  The type of the state data structure for interruptible key generation\n  operations.\n\n  Before calling any function on an interruptible key generation object, the\n  application must initialize it by any of the following means:\n - Set the structure to all-bits-zero, for example:\n   \\code\n   psa_generate_key_iop_t operation;\n   memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the structure to logical zero values, for example:\n   \\code\n   psa_generate_key_iop_t operation = {0};\n   \\endcode\n - Initialize the structure to the initializer #PSA_GENERATE_KEY_IOP_INIT,\n   for example:\n   \\code\n   psa_generate_key_iop_t operation = PSA_GENERATE_KEY_IOP_INIT;\n   \\endcode\n - Assign the result of the function psa_generate_key_iop_init() to the\n   structure, for example:\n   \\code\n   psa_generate_key_iop_t operation;\n   operation = psa_generate_key_iop_init();\n   \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n make any assumptions about the content of this structure.\n Implementation details can change in future versions without notice."]
+#[doc = "  The type of the state data structure for interruptible key generation\n  \
+         operations.\n\n  Before calling any function on an interruptible key generation object, \
+         the\n  application must initialize it by any of the following means:\n - Set the \
+         structure to all-bits-zero, for example:\n   \\code\n   psa_generate_key_iop_t \
+         operation;\n   memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the \
+         structure to logical zero values, for example:\n   \\code\n   psa_generate_key_iop_t \
+         operation = {0};\n   \\endcode\n - Initialize the structure to the initializer \
+         #PSA_GENERATE_KEY_IOP_INIT,\n   for example:\n   \\code\n   psa_generate_key_iop_t \
+         operation = PSA_GENERATE_KEY_IOP_INIT;\n   \\endcode\n - Assign the result of the \
+         function psa_generate_key_iop_init() to the\n   structure, for example:\n   \\code\n   \
+         psa_generate_key_iop_t operation;\n   operation = psa_generate_key_iop_init();\n   \
+         \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n \
+         make any assumptions about the content of this structure.\n Implementation details can \
+         change in future versions without notice."]
 pub type psa_generate_key_iop_t = psa_generate_key_iop_s;
 unsafe extern "C" {
     #[doc = " \\brief                       Get the number of ops that a key generation\n                              operation has taken so far. If the operation has\n                              completed, then this will represent the number\n                              of ops required for the entire operation. After\n                              initialization or calling \\c\n                              psa_generate_key_iop_abort() on the operation,\n                              a value of 0 will be returned.\n\n \\warning                     This is a beta API, and thus subject to change\n                              at any point. It is not bound by the usual\n                              interface stability promises.\n                              This is a helper provided to help you tune the\n                              value passed to \\c\n                              psa_interruptible_set_max_ops().\n\n \\param operation             The \\c psa_generate_key_iop_t to use. This must\n                              be initialized first.\n\n \\return                      Number of ops that the operation has taken so\n                              far."]
@@ -4296,7 +4540,20 @@ unsafe extern "C" {
     #[doc = " \\brief                       Abort a key generation operation.\n\n \\warning                     This is a beta API, and thus subject to change\n                              at any point. It is not bound by the usual\n                              interface stability promises.\n\n \\note                        This function clears the number of ops completed\n                              as part of the operation. Please ensure you copy\n                              this value via\n                              \\c psa_generate_key_iop_get_num_ops() if\n                              required before calling.\n\n \\note                        Aborting an operation frees all\n                              associated resources except for the operation\n                              structure itself. Once aborted, the operation\n                              object can be reused for another operation by\n                              calling \\c psa_generate_key_iop_setup() again.\n\n \\note                        You may call this function any time after the\n                              operation object has been initialized.\n                              In particular, calling \\c\n                              psa_generate_key_iop_abort() after the\n                              operation has already been terminated by a call\n                              to \\c psa_generate_key_iop_abort() or\n                              \\c psa_generate_key_iop_complete() is safe.\n\n \\param[in,out] operation     The \\c psa_key_agreement_iop_t to use\n\n \\retval #PSA_SUCCESS\n          The operation was aborted successfully.\n \\retval #PSA_ERROR_BAD_STATE\n          The library has not been previously initialized by\n          \\c psa_crypto_init()."]
     pub fn psa_generate_key_iop_abort(operation: *mut psa_generate_key_iop_t) -> psa_status_t;
 }
-#[doc = "  The type of the state data structure for interruptible public-key export\n  operations.\n\n  Before calling any function on an interruptible export public-key object, the\n  application must initialize it by any of the following means:\n - Set the structure to all-bits-zero, for example:\n \\code\n psa_export_public_key_iop_t operation;\n memset(&operation, 0, sizeof(operation));\n \\endcode\n - Initialize the structure to logical zero values, for example:\n \\code\n psa_export_public_key_iop_t operation = {0};\n \\endcode\n - Initialize the structure to the initializer #PSA_EXPORT_PUBLIC_KEY_IOP_INIT,\n   for example:\n \\code\n psa_export_public_key_iop_t operation = PSA_EXPORT_PUBLIC_KEY_IOP_INIT;\n \\endcode\n - Assign the result of the function psa_export_public_key_iop_init() to the\n   structure, for example:\n \\code\n psa_export_public_key_iop_t operation;\n operation = psa_export_public_key_iop_init();\n \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n make any assumptions about the content of this structure.\n Implementation details can change in future versions without notice."]
+#[doc = "  The type of the state data structure for interruptible public-key export\n  \
+         operations.\n\n  Before calling any function on an interruptible export public-key \
+         object, the\n  application must initialize it by any of the following means:\n - Set the \
+         structure to all-bits-zero, for example:\n \\code\n psa_export_public_key_iop_t \
+         operation;\n memset(&operation, 0, sizeof(operation));\n \\endcode\n - Initialize the \
+         structure to logical zero values, for example:\n \\code\n psa_export_public_key_iop_t \
+         operation = {0};\n \\endcode\n - Initialize the structure to the initializer \
+         #PSA_EXPORT_PUBLIC_KEY_IOP_INIT,\n   for example:\n \\code\n psa_export_public_key_iop_t \
+         operation = PSA_EXPORT_PUBLIC_KEY_IOP_INIT;\n \\endcode\n - Assign the result of the \
+         function psa_export_public_key_iop_init() to the\n   structure, for example:\n \\code\n \
+         psa_export_public_key_iop_t operation;\n operation = psa_export_public_key_iop_init();\n \
+         \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n \
+         make any assumptions about the content of this structure.\n Implementation details can \
+         change in future versions without notice."]
 pub type psa_export_public_key_iop_t = psa_export_public_key_iop_s;
 unsafe extern "C" {
     #[doc = " \\brief                       Get the number of ops that an export public-key\n                              operation has taken so far. If the operation has\n                              completed, then this will represent the number\n                              of ops required for the entire operation. After\n                              initialization or calling\n                              \\c psa_export_public_key_iop_abort() on the operation,\n                              a value of 0 will be returned.\n\n \\warning                     This is a beta API, and thus subject to change\n                              at any point. It is not bound by the usual\n                              interface stability promises.\n                              This is a helper provided to help you tune the\n                              value passed to\n                              \\c psa_interruptible_set_max_ops().\n\n \\param operation             The \\c psa_export_public_key_iop_t to use. This must\n                              be initialized first.\n\n \\return                      Number of ops that the operation has taken so\n                              far."]
@@ -4330,16 +4587,22 @@ unsafe extern "C" {
     pub fn psa_can_do_hash(hash_alg: psa_algorithm_t) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief Library deinitialization.\n\n This function clears all data associated with the PSA layer,\n including the whole key store.\n This function is not thread safe, it wipes every key slot regardless of\n state and reader count. It should only be called when no slot is in use.\n\n This is an Mbed TLS extension."]
+    #[doc = " \\brief Library deinitialization.\n\n This function clears all data associated with \
+             the PSA layer,\n including the whole key store.\n This function is not thread safe, \
+             it wipes every key slot regardless of\n state and reader count. It should only be \
+             called when no slot is in use.\n\n This is an Mbed TLS extension."]
     pub fn mbedtls_psa_crypto_free();
 }
-#[doc = " \\brief Statistics about\n resource consumption related to the PSA keystore.\n\n \\note The content of this structure is not part of the stable API and ABI\n       of Mbed TLS and may change arbitrarily from version to version."]
+#[doc = " \\brief Statistics about\n resource consumption related to the PSA keystore.\n\n \\note \
+         The content of this structure is not part of the stable API and ABI\n       of Mbed TLS \
+         and may change arbitrarily from version to version."]
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct mbedtls_psa_stats_s {
     #[doc = " Number of slots containing key material for a volatile key."]
     pub private_volatile_slots: usize,
-    #[doc = " Number of slots containing key material for a key which is in\n internal persistent storage."]
+    #[doc = " Number of slots containing key material for a key which is in\n internal persistent \
+             storage."]
     pub private_persistent_slots: usize,
     #[doc = " Number of slots containing a reference to a key in a\n secure element."]
     pub private_external_slots: usize,
@@ -4356,23 +4619,39 @@ pub struct mbedtls_psa_stats_s {
     #[doc = " Largest key id value among open keys in secure elements."]
     pub private_max_open_external_key_id: psa_key_id_t,
 }
-#[doc = " \\brief Statistics about\n resource consumption related to the PSA keystore.\n\n \\note The content of this structure is not part of the stable API and ABI\n       of Mbed TLS and may change arbitrarily from version to version."]
+#[doc = " \\brief Statistics about\n resource consumption related to the PSA keystore.\n\n \\note \
+         The content of this structure is not part of the stable API and ABI\n       of Mbed TLS \
+         and may change arbitrarily from version to version."]
 pub type mbedtls_psa_stats_t = mbedtls_psa_stats_s;
 unsafe extern "C" {
-    #[doc = " \\brief Get statistics about\n resource consumption related to the PSA keystore.\n\n \\note When Mbed TLS is built as part of a service, with isolation\n       between the application and the keystore, the service may or\n       may not expose this function."]
+    #[doc = " \\brief Get statistics about\n resource consumption related to the PSA keystore.\n\n \
+             \\note When Mbed TLS is built as part of a service, with isolation\n       between \
+             the application and the keystore, the service may or\n       may not expose this \
+             function."]
     pub fn mbedtls_psa_get_stats(stats: *mut mbedtls_psa_stats_t);
 }
-#[doc = " A slot number identifying a key in a driver.\n\n Values of this type are used to identify built-in keys."]
+#[doc = " A slot number identifying a key in a driver.\n\n Values of this type are used to \
+         identify built-in keys."]
 pub type psa_drv_slot_number_t = u64;
-#[doc = " \\brief Encoding of the application role of PAKE\n\n Encodes the application's role in the algorithm is being executed. For more\n information see the documentation of individual \\c PSA_PAKE_ROLE_XXX\n constants."]
+#[doc = " \\brief Encoding of the application role of PAKE\n\n Encodes the application's role in \
+         the algorithm is being executed. For more\n information see the documentation of \
+         individual \\c PSA_PAKE_ROLE_XXX\n constants."]
 pub type psa_pake_role_t = u8;
-#[doc = " Encoding of input and output indicators for PAKE.\n\n Some PAKE algorithms need to exchange more data than just a single key share.\n This type is for encoding additional input and output data for such\n algorithms."]
+#[doc = " Encoding of input and output indicators for PAKE.\n\n Some PAKE algorithms need to \
+         exchange more data than just a single key share.\n This type is for encoding additional \
+         input and output data for such\n algorithms."]
 pub type psa_pake_step_t = u8;
-#[doc = " Encoding of the type of the PAKE's primitive.\n\n Values defined by this standard will never be in the range 0x80-0xff.\n Vendors who define additional types must use an encoding in this range.\n\n For more information see the documentation of individual\n \\c PSA_PAKE_PRIMITIVE_TYPE_XXX constants."]
+#[doc = " Encoding of the type of the PAKE's primitive.\n\n Values defined by this standard will \
+         never be in the range 0x80-0xff.\n Vendors who define additional types must use an \
+         encoding in this range.\n\n For more information see the documentation of individual\n \
+         \\c PSA_PAKE_PRIMITIVE_TYPE_XXX constants."]
 pub type psa_pake_primitive_type_t = u8;
-#[doc = " \\brief Encoding of the family of the primitive associated with the PAKE.\n\n For more information see the documentation of individual\n \\c PSA_PAKE_PRIMITIVE_TYPE_XXX constants."]
+#[doc = " \\brief Encoding of the family of the primitive associated with the PAKE.\n\n For more \
+         information see the documentation of individual\n \\c PSA_PAKE_PRIMITIVE_TYPE_XXX \
+         constants."]
 pub type psa_pake_family_t = u8;
-#[doc = " \\brief Encoding of the primitive associated with the PAKE.\n\n For more information see the documentation of the #PSA_PAKE_PRIMITIVE macro."]
+#[doc = " \\brief Encoding of the primitive associated with the PAKE.\n\n For more information see \
+         the documentation of the #PSA_PAKE_PRIMITIVE macro."]
 pub type psa_pake_primitive_t = u32;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
@@ -4451,7 +4730,11 @@ impl Default for psa_jpake_computation_stage_s {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct psa_pake_operation_s {
-    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver contexts are driver-specific, swapping\n drivers halfway through the operation is not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID value zero means the context is not valid or not assigned to\n any driver (i.e. none of the driver contexts are active)."]
+    #[doc = " Unique ID indicating which driver got assigned to do the\n operation. Since driver \
+             contexts are driver-specific, swapping\n drivers halfway through the operation is \
+             not supported.\n ID values are auto-generated in psa_crypto_driver_wrappers.h\n ID \
+             value zero means the context is not valid or not assigned to\n any driver (i.e. none \
+             of the driver contexts are active)."]
     pub private_id: ::std::os::raw::c_uint,
     pub private_alg: psa_algorithm_t,
     pub private_primitive: psa_pake_primitive_t,
@@ -4498,7 +4781,10 @@ impl Default for psa_pake_operation_s {
         }
     }
 }
-#[doc = " The type of the data structure for PAKE cipher suites.\n\n This is an implementation-defined \\c struct. Applications should not\n make any assumptions about the content of this structure.\n Implementation details can change in future versions without notice."]
+#[doc = " The type of the data structure for PAKE cipher suites.\n\n This is an \
+         implementation-defined \\c struct. Applications should not\n make any assumptions about \
+         the content of this structure.\n Implementation details can change in future versions \
+         without notice."]
 pub type psa_pake_cipher_suite_t = psa_pake_cipher_suite_s;
 #[doc = " The type of the state data structure for PAKE operations.\n\n Before calling any function on a PAKE operation object, the application\n must initialize it by any of the following means:\n - Set the structure to all-bits-zero, for example:\n   \\code\n   psa_pake_operation_t operation;\n   memset(&operation, 0, sizeof(operation));\n   \\endcode\n - Initialize the structure to logical zero values, for example:\n   \\code\n   psa_pake_operation_t operation = {0};\n   \\endcode\n - Initialize the structure to the initializer #PSA_PAKE_OPERATION_INIT,\n   for example:\n   \\code\n   psa_pake_operation_t operation = PSA_PAKE_OPERATION_INIT;\n   \\endcode\n - Assign the result of the function psa_pake_operation_init()\n   to the structure, for example:\n   \\code\n   psa_pake_operation_t operation;\n   operation = psa_pake_operation_init();\n   \\endcode\n\n This is an implementation-defined \\c struct. Applications should not\n make any assumptions about the content of this structure.\n Implementation details can change in future versions without notice."]
 pub type psa_pake_operation_t = psa_pake_operation_s;
@@ -4514,7 +4800,11 @@ unsafe extern "C" {
     ) -> psa_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Get the password from given inputs.\n\n \\param[in]  inputs           Operation inputs.\n \\param[out] buffer           Return buffer for password.\n \\param      buffer_size      Size of the return buffer in bytes.\n \\param[out] buffer_length    Actual size of the password in bytes.\n\n \\retval #PSA_SUCCESS\n         Success.\n \\retval #PSA_ERROR_BAD_STATE\n         Password hasn't been set yet."]
+    #[doc = " Get the password from given inputs.\n\n \\param[in]  inputs           Operation \
+             inputs.\n \\param[out] buffer           Return buffer for password.\n \\param      \
+             buffer_size      Size of the return buffer in bytes.\n \\param[out] buffer_length    \
+             Actual size of the password in bytes.\n\n \\retval #PSA_SUCCESS\n         Success.\n \
+             \\retval #PSA_ERROR_BAD_STATE\n         Password hasn't been set yet."]
     pub fn psa_crypto_driver_pake_get_password(
         inputs: *const psa_crypto_driver_pake_inputs_t,
         buffer: *mut u8,
@@ -4555,7 +4845,10 @@ unsafe extern "C" {
     ) -> psa_status_t;
 }
 unsafe extern "C" {
-    #[doc = " Get the cipher suite from given inputs.\n\n \\param[in]  inputs           Operation inputs.\n \\param[out] cipher_suite     Return buffer for role.\n\n \\retval #PSA_SUCCESS\n         Success.\n \\retval #PSA_ERROR_BAD_STATE\n         Cipher_suite hasn't been set yet."]
+    #[doc = " Get the cipher suite from given inputs.\n\n \\param[in]  inputs           Operation \
+             inputs.\n \\param[out] cipher_suite     Return buffer for role.\n\n \\retval \
+             #PSA_SUCCESS\n         Success.\n \\retval #PSA_ERROR_BAD_STATE\n         \
+             Cipher_suite hasn't been set yet."]
     pub fn psa_crypto_driver_pake_get_cipher_suite(
         inputs: *const psa_crypto_driver_pake_inputs_t,
         cipher_suite: *mut psa_pake_cipher_suite_t,
@@ -4678,14 +4971,29 @@ unsafe extern "C" {
     pub fn mbedtls_pk_free(ctx: *mut mbedtls_pk_context);
 }
 unsafe extern "C" {
-    #[doc = " \\brief Populate a PK context by wrapping a PSA key pair.\n\n The PSA key must be an EC or RSA key pair (FFDH is not suported in PK).\n\n The resulting context can only perform operations that are allowed by the\n key's policy. Additionally, it currently has the following limitations:\n - restartable operations can't be used;\n - for RSA keys, signature verification is not supported, and neither is use\n   of \\c mbedtls_pk_check_pair().\n\n \\warning The PSA wrapped key must remain valid as long as the wrapping PK\n          context is in use, that is at least between the point this function\n          is called and the point mbedtls_pk_free() is called on this context.\n\n \\param ctx The context to populate. It must be empty.\n \\param key The PSA key to wrap, which must hold an ECC or RSA key pair.\n\n \\return    \\c 0 on success.\n \\return    #PSA_ERROR_INVALID_ARGUMENT on invalid input (context already\n            used, invalid key identifier).\n \\return    #MBEDTLS_ERR_PK_FEATURE_UNAVAILABLE if the key is not an ECC or\n            RSA key pair.\n \\return    #PSA_ERROR_INSUFFICIENT_MEMORY on allocation failure."]
+    #[doc = " \\brief Populate a PK context by wrapping a PSA key pair.\n\n The PSA key must be an \
+             EC or RSA key pair (FFDH is not suported in PK).\n\n The resulting context can only \
+             perform operations that are allowed by the\n key's policy. Additionally, it currently \
+             has the following limitations:\n - restartable operations can't be used;\n - for RSA \
+             keys, signature verification is not supported, and neither is use\n   of \\c \
+             mbedtls_pk_check_pair().\n\n \\warning The PSA wrapped key must remain valid as long \
+             as the wrapping PK\n          context is in use, that is at least between the point \
+             this function\n          is called and the point mbedtls_pk_free() is called on this \
+             context.\n\n \\param ctx The context to populate. It must be empty.\n \\param key The \
+             PSA key to wrap, which must hold an ECC or RSA key pair.\n\n \\return    \\c 0 on \
+             success.\n \\return    #PSA_ERROR_INVALID_ARGUMENT on invalid input (context \
+             already\n            used, invalid key identifier).\n \\return    \
+             #MBEDTLS_ERR_PK_FEATURE_UNAVAILABLE if the key is not an ECC or\n            RSA key \
+             pair.\n \\return    #PSA_ERROR_INSUFFICIENT_MEMORY on allocation failure."]
     pub fn mbedtls_pk_wrap_psa(
         ctx: *mut mbedtls_pk_context,
         key: mbedtls_svc_key_id_t,
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Get the size in bits of the underlying key\n\n \\param ctx       The context to query. It must have been populated.\n\n \\return          Key size in bits, or 0 on error"]
+    #[doc = " \\brief           Get the size in bits of the underlying key\n\n \\param ctx       \
+             The context to query. It must have been populated.\n\n \\return          Key size in \
+             bits, or 0 on error"]
     pub fn mbedtls_pk_get_bitlen(ctx: *const mbedtls_pk_context) -> usize;
 }
 unsafe extern "C" {
@@ -4727,7 +5035,19 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Verify signature.\n\n \\note            The signature algorithm used will be the one that would be\n                  selected by \\c mbedtls_pk_get_psa_attributes() called with a\n                  usage of #PSA_KEY_USAGE_VERIFY_HASH - see that function's\n                  documentation for details.\n                  If you want to select a specific signature algorithm, see\n                  \\c mbedtls_pk_verify_ext().\n\n \\note            This function currently does not work on RSA keys created\n                  with \\c mbedtls_pk_wrap_psa().\n\n \\param ctx       The PK context to use. It must have been populated.\n \\param md_alg    Hash algorithm used.\n \\param hash      Hash of the message to sign\n \\param hash_len  Hash length\n \\param sig       Signature to verify\n \\param sig_len   Signature length\n\n \\return          0 on success (signature is valid),\n                  #PSA_ERROR_INVALID_SIGNATURE if the signature is invalid,\n                  or another specific error code."]
+    #[doc = " \\brief           Verify signature.\n\n \\note            The signature algorithm \
+             used will be the one that would be\n                  selected by \\c \
+             mbedtls_pk_get_psa_attributes() called with a\n                  usage of \
+             #PSA_KEY_USAGE_VERIFY_HASH - see that function's\n                  documentation for \
+             details.\n                  If you want to select a specific signature algorithm, \
+             see\n                  \\c mbedtls_pk_verify_ext().\n\n \\note            This \
+             function currently does not work on RSA keys created\n                  with \\c \
+             mbedtls_pk_wrap_psa().\n\n \\param ctx       The PK context to use. It must have been \
+             populated.\n \\param md_alg    Hash algorithm used.\n \\param hash      Hash of the \
+             message to sign\n \\param hash_len  Hash length\n \\param sig       Signature to \
+             verify\n \\param sig_len   Signature length\n\n \\return          0 on success \
+             (signature is valid),\n                  #PSA_ERROR_INVALID_SIGNATURE if the \
+             signature is invalid,\n                  or another specific error code."]
     pub fn mbedtls_pk_verify(
         ctx: *mut mbedtls_pk_context,
         md_alg: mbedtls_md_type_t,
@@ -4774,7 +5094,26 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Restartable version of \\c mbedtls_pk_sign()\n\n \\note            Performs the same job as \\c mbedtls_pk_sign(), but can\n                  return early and restart according to the limit set with \\c\n                  psa_interruptible_set_max_ops() to reduce blocking for ECC\n                  operations. For RSA, same as \\c mbedtls_pk_sign().\n\n \\note            For ECC keys, always uses #MBEDTLS_PK_ALG_ECDSA(hash), where\n                  hash is the PSA alg identifier corresponding to \\p hash.\n\n \\note            This function currently does not work on ECC keys created\n                  with \\c mbedtls_pk_wrap_psa().\n\n \\param ctx       The PK context to use. It must have been populated\n                  with a private key.\n \\param md_alg    Hash algorithm used.\n \\param hash      Hash of the message to sign\n \\param hash_len  Hash length\n \\param sig       Place to write the signature.\n                  It must have enough room for the signature.\n                  #MBEDTLS_PK_SIGNATURE_MAX_SIZE is always enough.\n                  You may use a smaller buffer if it is large enough\n                  given the key type.\n \\param sig_size  The size of the \\p sig buffer in bytes.\n \\param sig_len   On successful return,\n                  the number of bytes written to \\p sig.\n \\param rs_ctx    Restart context (NULL to disable restart)\n\n \\return          See \\c mbedtls_pk_sign().\n \\return          #PSA_OPERATION_INCOMPLETE if the maximum number of\n                  operations was reached: see \\c\n                  psa_interruptible_set_max_ops()."]
+    #[doc = " \\brief           Restartable version of \\c mbedtls_pk_sign()\n\n \\note            \
+             Performs the same job as \\c mbedtls_pk_sign(), but can\n                  return \
+             early and restart according to the limit set with \\c\n                  \
+             psa_interruptible_set_max_ops() to reduce blocking for ECC\n                  \
+             operations. For RSA, same as \\c mbedtls_pk_sign().\n\n \\note            For ECC \
+             keys, always uses #MBEDTLS_PK_ALG_ECDSA(hash), where\n                  hash is the \
+             PSA alg identifier corresponding to \\p hash.\n\n \\note            This function \
+             currently does not work on ECC keys created\n                  with \\c \
+             mbedtls_pk_wrap_psa().\n\n \\param ctx       The PK context to use. It must have been \
+             populated\n                  with a private key.\n \\param md_alg    Hash algorithm \
+             used.\n \\param hash      Hash of the message to sign\n \\param hash_len  Hash \
+             length\n \\param sig       Place to write the signature.\n                  It must \
+             have enough room for the signature.\n                  #MBEDTLS_PK_SIGNATURE_MAX_SIZE \
+             is always enough.\n                  You may use a smaller buffer if it is large \
+             enough\n                  given the key type.\n \\param sig_size  The size of the \\p \
+             sig buffer in bytes.\n \\param sig_len   On successful return,\n                  the \
+             number of bytes written to \\p sig.\n \\param rs_ctx    Restart context (NULL to \
+             disable restart)\n\n \\return          See \\c mbedtls_pk_sign().\n \\return          \
+             #PSA_OPERATION_INCOMPLETE if the maximum number of\n                  operations was \
+             reached: see \\c\n                  psa_interruptible_set_max_ops()."]
     pub fn mbedtls_pk_sign_restartable(
         ctx: *mut mbedtls_pk_context,
         md_alg: mbedtls_md_type_t,
@@ -4833,7 +5172,12 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\ingroup pk_module */\n/**\n \\brief           Load and parse a public key\n\n \\param ctx       The PK context to populate. It must be empty.\n \\param path      filename to read the public key from\n\n \\note            If you need a specific key type, check the result with\n                  \\c mbedtls_pk_can_do_psa().\n\n \\note            The key is also checked for correctness.\n\n \\return          0 if successful, or a specific PK or PEM error code"]
+    #[doc = " \\ingroup pk_module */\n/**\n \\brief           Load and parse a public key\n\n \
+             \\param ctx       The PK context to populate. It must be empty.\n \\param path      \
+             filename to read the public key from\n\n \\note            If you need a specific key \
+             type, check the result with\n                  \\c mbedtls_pk_can_do_psa().\n\n \
+             \\note            The key is also checked for correctness.\n\n \\return          0 if \
+             successful, or a specific PK or PEM error code"]
     pub fn mbedtls_pk_parse_public_keyfile(
         ctx: *mut mbedtls_pk_context,
         path: *const ::std::os::raw::c_char,
@@ -4856,7 +5200,11 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Write a public key to a PEM string\n\n \\param ctx       PK context which must contain a valid public or private key.\n \\param buf       Buffer to write to. The output includes a\n                  terminating null byte.\n \\param size      Size of the buffer in bytes.\n\n \\return          0 if successful, or a specific error code"]
+    #[doc = " \\brief           Write a public key to a PEM string\n\n \\param ctx       PK \
+             context which must contain a valid public or private key.\n \\param buf       Buffer \
+             to write to. The output includes a\n                  terminating null byte.\n \
+             \\param size      Size of the buffer in bytes.\n\n \\return          0 if successful, \
+             or a specific error code"]
     pub fn mbedtls_pk_write_pubkey_pem(
         ctx: *const mbedtls_pk_context,
         buf: *mut ::std::os::raw::c_uchar,
@@ -4881,7 +5229,9 @@ pub const mbedtls_key_exchange_type_t_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK: mbedtls_ke
     4;
 pub const mbedtls_key_exchange_type_t_MBEDTLS_KEY_EXCHANGE_ECJPAKE: mbedtls_key_exchange_type_t = 5;
 pub type mbedtls_key_exchange_type_t = ::std::os::raw::c_uint;
-#[doc = " \\brief   This structure is used for storing ciphersuite information\n\n \\note    members are defined using integral types instead of enums\n          in order to pack structure and reduce memory usage by internal\n          \\c ciphersuite_definitions[]"]
+#[doc = " \\brief   This structure is used for storing ciphersuite information\n\n \\note    \
+         members are defined using integral types instead of enums\n          in order to pack \
+         structure and reduce memory usage by internal\n          \\c ciphersuite_definitions[]"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_ssl_ciphersuite_t {
@@ -4967,7 +5317,10 @@ impl Default for mbedtls_asn1_bitstring {
 pub struct mbedtls_asn1_sequence {
     #[doc = "< Buffer containing the given ASN.1 item."]
     pub buf: mbedtls_asn1_buf,
-    #[doc = " The next entry in the sequence.\n\n The details of memory management for sequences are not documented and\n may change in future versions. Set this field to \\p NULL when\n initializing a structure, and do not modify it except via Mbed TLS\n library functions."]
+    #[doc = " The next entry in the sequence.\n\n The details of memory management for sequences \
+             are not documented and\n may change in future versions. Set this field to \\p NULL \
+             when\n initializing a structure, and do not modify it except via Mbed TLS\n library \
+             functions."]
     pub next: *mut mbedtls_asn1_sequence,
 }
 impl Default for mbedtls_asn1_sequence {
@@ -4987,9 +5340,14 @@ pub struct mbedtls_asn1_named_data {
     pub oid: mbedtls_asn1_buf,
     #[doc = "< The named value."]
     pub val: mbedtls_asn1_buf,
-    #[doc = " The next entry in the sequence.\n\n The details of memory management for named data sequences are not\n documented and may change in future versions. Set this field to \\p NULL\n when initializing a structure, and do not modify it except via Mbed TLS\n library functions."]
+    #[doc = " The next entry in the sequence.\n\n The details of memory management for named data \
+             sequences are not\n documented and may change in future versions. Set this field to \
+             \\p NULL\n when initializing a structure, and do not modify it except via Mbed TLS\n \
+             library functions."]
     pub next: *mut mbedtls_asn1_named_data,
-    #[doc = " Merge next item into the current one?\n\n This field exists for the sake of Mbed TLS's X.509 certificate parsing\n code and may change in future versions of the library."]
+    #[doc = " Merge next item into the current one?\n\n This field exists for the sake of Mbed \
+             TLS's X.509 certificate parsing\n code and may change in future versions of the \
+             library."]
     pub private_next_merged: ::std::os::raw::c_uchar,
 }
 impl Default for mbedtls_asn1_named_data {
@@ -5077,7 +5435,19 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Free a heap-allocated linked list presentation of\n                 an ASN.1 sequence, including the first element.\n\n There are two common ways to manage the memory used for the representation\n of a parsed ASN.1 sequence:\n - Allocate a head node `mbedtls_asn1_sequence *head` with mbedtls_calloc().\n   Pass this node as the `cur` argument to mbedtls_asn1_get_sequence_of().\n   When you have finished processing the sequence,\n   call mbedtls_asn1_sequence_free() on `head`.\n - Allocate a head node `mbedtls_asn1_sequence *head` in any manner,\n   for example on the stack. Make sure that `head->next == NULL`.\n   Pass `head` as the `cur` argument to mbedtls_asn1_get_sequence_of().\n   When you have finished processing the sequence,\n   call mbedtls_asn1_sequence_free() on `head->cur`,\n   then free `head` itself in the appropriate manner.\n\n \\param seq      The address of the first sequence component. This may\n                 be \\c NULL, in which case this functions returns\n                 immediately."]
+    #[doc = " \\brief          Free a heap-allocated linked list presentation of\n                 \
+             an ASN.1 sequence, including the first element.\n\n There are two common ways to \
+             manage the memory used for the representation\n of a parsed ASN.1 sequence:\n - \
+             Allocate a head node `mbedtls_asn1_sequence *head` with mbedtls_calloc().\n   Pass \
+             this node as the `cur` argument to mbedtls_asn1_get_sequence_of().\n   When you have \
+             finished processing the sequence,\n   call mbedtls_asn1_sequence_free() on `head`.\n \
+             - Allocate a head node `mbedtls_asn1_sequence *head` in any manner,\n   for example \
+             on the stack. Make sure that `head->next == NULL`.\n   Pass `head` as the `cur` \
+             argument to mbedtls_asn1_get_sequence_of().\n   When you have finished processing the \
+             sequence,\n   call mbedtls_asn1_sequence_free() on `head->cur`,\n   then free `head` \
+             itself in the appropriate manner.\n\n \\param seq      The address of the first \
+             sequence component. This may\n                 be \\c NULL, in which case this \
+             functions returns\n                 immediately."]
     pub fn mbedtls_asn1_sequence_free(seq: *mut mbedtls_asn1_sequence);
 }
 unsafe extern "C" {
@@ -5126,7 +5496,10 @@ unsafe extern "C" {
     ) -> *const mbedtls_asn1_named_data;
 }
 unsafe extern "C" {
-    #[doc = " \\brief       Free all entries in a mbedtls_asn1_named_data list.\n\n \\param head  Pointer to the head of the list of named data entries to free.\n              This function calls mbedtls_free() on\n              `entry->oid.p` and `entry->val.p` and then on `entry`\n              for each list entry, and sets \\c *head to \\c NULL."]
+    #[doc = " \\brief       Free all entries in a mbedtls_asn1_named_data list.\n\n \\param head  \
+             Pointer to the head of the list of named data entries to free.\n              This \
+             function calls mbedtls_free() on\n              `entry->oid.p` and `entry->val.p` and \
+             then on `entry`\n              for each list entry, and sets \\c *head to \\c NULL."]
     pub fn mbedtls_asn1_free_named_data_list(head: *mut *mut mbedtls_asn1_named_data);
 }
 unsafe extern "C" {
@@ -5137,7 +5510,8 @@ unsafe extern "C" {
 pub type mbedtls_x509_buf = mbedtls_asn1_buf;
 #[doc = " Container for ASN1 bit strings."]
 pub type mbedtls_x509_bitstring = mbedtls_asn1_bitstring;
-#[doc = " Container for ASN1 named information objects.\n It allows for Relative Distinguished Names (e.g. cn=localhost,ou=code,etc.)."]
+#[doc = " Container for ASN1 named information objects.\n It allows for Relative Distinguished \
+         Names (e.g. cn=localhost,ou=code,etc.)."]
 pub type mbedtls_x509_name = mbedtls_asn1_named_data;
 #[doc = " Container for a sequence of ASN.1 items"]
 pub type mbedtls_x509_sequence = mbedtls_asn1_sequence;
@@ -5175,7 +5549,10 @@ pub struct mbedtls_x509_time {
     #[doc = "< Time."]
     pub sec: ::std::os::raw::c_int,
 }
-#[doc = " From RFC 5280 section 4.2.1.6:\n OtherName ::= SEQUENCE {\n      type-id    OBJECT IDENTIFIER,\n      value      [0] EXPLICIT ANY DEFINED BY type-id }\n\n Future versions of the library may add new fields to this structure or\n to its embedded union and structure."]
+#[doc = " From RFC 5280 section 4.2.1.6:\n OtherName ::= SEQUENCE {\n      type-id    OBJECT \
+         IDENTIFIER,\n      value      [0] EXPLICIT ANY DEFINED BY type-id }\n\n Future versions \
+         of the library may add new fields to this structure or\n to its embedded union and \
+         structure."]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct mbedtls_x509_san_other_name {
@@ -5188,7 +5565,8 @@ pub struct mbedtls_x509_san_other_name {
 pub union mbedtls_x509_san_other_name__bindgen_ty_1 {
     pub hardware_module_name: mbedtls_x509_san_other_name__bindgen_ty_1__bindgen_ty_1,
 }
-#[doc = " From RFC 4108 section 5:\n HardwareModuleName ::= SEQUENCE {\n                         hwType OBJECT IDENTIFIER,\n                         hwSerialNum OCTET STRING }"]
+#[doc = " From RFC 4108 section 5:\n HardwareModuleName ::= SEQUENCE {\n                         \
+         hwType OBJECT IDENTIFIER,\n                         hwSerialNum OCTET STRING }"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_x509_san_other_name__bindgen_ty_1__bindgen_ty_1 {
@@ -5224,7 +5602,9 @@ impl Default for mbedtls_x509_san_other_name {
         }
     }
 }
-#[doc = " A structure for holding the parsed Subject Alternative Name,\n according to type.\n\n Future versions of the library may add new fields to this structure or\n to its embedded union and structure."]
+#[doc = " A structure for holding the parsed Subject Alternative Name,\n according to type.\n\n \
+         Future versions of the library may add new fields to this structure or\n to its embedded \
+         union and structure."]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct mbedtls_x509_subject_alternative_name {
@@ -5238,7 +5618,8 @@ pub struct mbedtls_x509_subject_alternative_name {
 pub union mbedtls_x509_subject_alternative_name__bindgen_ty_1 {
     pub other_name: mbedtls_x509_san_other_name,
     pub directory_name: mbedtls_x509_name,
-    #[doc = "< The buffer for the unstructured types. rfc822Name, dnsName and uniformResourceIdentifier are currently supported."]
+    #[doc = "< The buffer for the unstructured types. rfc822Name, dnsName and \
+             uniformResourceIdentifier are currently supported."]
     pub unstructured_name: mbedtls_x509_buf,
 }
 impl Default for mbedtls_x509_subject_alternative_name__bindgen_ty_1 {
@@ -5327,7 +5708,8 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Unallocate all data related to subject alternative name\n\n \\param san      SAN structure - extra memory owned by this structure will be freed"]
+    #[doc = " \\brief          Unallocate all data related to subject alternative name\n\n \\param \
+             san      SAN structure - extra memory owned by this structure will be freed"]
     pub fn mbedtls_x509_free_subject_alt_name(san: *mut mbedtls_x509_subject_alternative_name);
 }
 unsafe extern "C" {
@@ -5337,7 +5719,10 @@ unsafe extern "C" {
         dst: *mut ::std::os::raw::c_void,
     ) -> usize;
 }
-#[doc = " Certificate revocation list entry.\n Contains the CA-specific serial numbers and revocation dates.\n\n Some fields of this structure are publicly readable. Do not modify\n them except via Mbed TLS library functions: the effect of modifying\n those fields or the data that those fields points to is unspecified."]
+#[doc = " Certificate revocation list entry.\n Contains the CA-specific serial numbers and \
+         revocation dates.\n\n Some fields of this structure are publicly readable. Do not \
+         modify\n them except via Mbed TLS library functions: the effect of modifying\n those \
+         fields or the data that those fields points to is unspecified."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_x509_crl_entry {
@@ -5347,9 +5732,12 @@ pub struct mbedtls_x509_crl_entry {
     pub serial: mbedtls_x509_buf,
     #[doc = " The revocation date of this entry."]
     pub revocation_date: mbedtls_x509_time,
-    #[doc = " Direct access to the list of CRL entry extensions\n (an ASN.1 constructed sequence).\n\n If there are no extensions, `entry_ext.len == 0` and\n `entry_ext.p == NULL`."]
+    #[doc = " Direct access to the list of CRL entry extensions\n (an ASN.1 constructed \
+             sequence).\n\n If there are no extensions, `entry_ext.len == 0` and\n `entry_ext.p \
+             == NULL`."]
     pub entry_ext: mbedtls_x509_buf,
-    #[doc = " Next element in the linked list of entries.\n \\p NULL indicates the end of the list.\n Do not modify this field directly."]
+    #[doc = " Next element in the linked list of entries.\n \\p NULL indicates the end of the \
+             list.\n Do not modify this field directly."]
     pub next: *mut mbedtls_x509_crl_entry,
 }
 impl Default for mbedtls_x509_crl_entry {
@@ -5384,11 +5772,14 @@ pub struct mbedtls_x509_crl {
     pub crl_ext: mbedtls_x509_buf,
     pub private_sig_oid2: mbedtls_x509_buf,
     pub private_sig: mbedtls_x509_buf,
-    #[doc = "< Internal representation of the MD algorithm of the signature algorithm, e.g. MBEDTLS_MD_SHA256"]
+    #[doc = "< Internal representation of the MD algorithm of the signature algorithm, e.g. \
+             MBEDTLS_MD_SHA256"]
     pub private_sig_md: mbedtls_md_type_t,
-    #[doc = "< Internal representation of the Public Key algorithm of the signature algorithm, e.g. MBEDTLS_PK_RSA"]
+    #[doc = "< Internal representation of the Public Key algorithm of the signature algorithm, \
+             e.g. MBEDTLS_PK_RSA"]
     pub private_sig_pk: mbedtls_pk_sigalg_t,
-    #[doc = " Next element in the linked list of CRL.\n \\p NULL indicates the end of the list.\n Do not modify this field directly."]
+    #[doc = " Next element in the linked list of CRL.\n \\p NULL indicates the end of the list.\n \
+             Do not modify this field directly."]
     pub next: *mut mbedtls_x509_crl,
 }
 impl Default for mbedtls_x509_crl {
@@ -5424,7 +5815,11 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Returns an informational string about the CRL.\n\n \\param buf      Buffer to write to\n \\param size     Maximum size of buffer\n \\param prefix   A line prefix\n \\param crl      The X509 CRL to represent\n\n \\return         The length of the string written (not including the\n                 terminated nul byte), or a negative error code."]
+    #[doc = " \\brief          Returns an informational string about the CRL.\n\n \\param buf      \
+             Buffer to write to\n \\param size     Maximum size of buffer\n \\param prefix   A \
+             line prefix\n \\param crl      The X509 CRL to represent\n\n \\return         The \
+             length of the string written (not including the\n                 terminated nul \
+             byte), or a negative error code."]
     pub fn mbedtls_x509_crl_info(
         buf: *mut ::std::os::raw::c_char,
         size: usize,
@@ -5433,14 +5828,18 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Initialize a CRL (chain)\n\n \\param crl      CRL chain to initialize"]
+    #[doc = " \\brief          Initialize a CRL (chain)\n\n \\param crl      CRL chain to \
+             initialize"]
     pub fn mbedtls_x509_crl_init(crl: *mut mbedtls_x509_crl);
 }
 unsafe extern "C" {
     #[doc = " \\brief          Unallocate all CRL data\n\n \\param crl      CRL chain to free"]
     pub fn mbedtls_x509_crl_free(crl: *mut mbedtls_x509_crl);
 }
-#[doc = " Container for an X.509 certificate. The certificate may be chained.\n\n Some fields of this structure are publicly readable. Do not modify\n them except via Mbed TLS library functions: the effect of modifying\n those fields or the data that those fields points to is unspecified."]
+#[doc = " Container for an X.509 certificate. The certificate may be chained.\n\n Some fields of \
+         this structure are publicly readable. Do not modify\n them except via Mbed TLS library \
+         functions: the effect of modifying\n those fields or the data that those fields points to \
+         is unspecified."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_x509_crt {
@@ -5477,19 +5876,23 @@ pub struct mbedtls_x509_crt {
     pub subject_id: mbedtls_x509_buf,
     #[doc = "< Optional X.509 v3 extensions."]
     pub v3_ext: mbedtls_x509_buf,
-    #[doc = "< Optional list of raw entries of Subject Alternative Names extension. These can be later parsed by mbedtls_x509_parse_subject_alt_name."]
+    #[doc = "< Optional list of raw entries of Subject Alternative Names extension. These can be \
+             later parsed by mbedtls_x509_parse_subject_alt_name."]
     pub subject_alt_names: mbedtls_x509_sequence,
     #[doc = "< Optional X.509 v3 extension subject key identifier."]
     pub subject_key_id: mbedtls_x509_buf,
     #[doc = "< Optional X.509 v3 extension authority key identifier."]
     pub authority_key_id: mbedtls_x509_authority,
-    #[doc = "< Optional list of certificate policies (Only anyPolicy is printed and enforced, however the rest of the policies are still listed)."]
+    #[doc = "< Optional list of certificate policies (Only anyPolicy is printed and enforced, \
+             however the rest of the policies are still listed)."]
     pub certificate_policies: mbedtls_x509_sequence,
     #[doc = "< Bit string containing detected and parsed extensions"]
     pub private_ext_types: ::std::os::raw::c_int,
-    #[doc = "< Optional Basic Constraint extension value: 1 if this certificate belongs to a CA, 0 otherwise."]
+    #[doc = "< Optional Basic Constraint extension value: 1 if this certificate belongs to a CA, \
+             0 otherwise."]
     pub private_ca_istrue: ::std::os::raw::c_int,
-    #[doc = "< Optional Basic Constraint extension value: The maximum path length to the root certificate. Path length is 1 higher than RFC 5280 'meaning', so 1+"]
+    #[doc = "< Optional Basic Constraint extension value: The maximum path length to the root \
+             certificate. Path length is 1 higher than RFC 5280 'meaning', so 1+"]
     pub private_max_pathlen: ::std::os::raw::c_int,
     #[doc = "< Optional key usage extension value: See the values in x509.h"]
     pub private_key_usage: ::std::os::raw::c_uint,
@@ -5499,11 +5902,14 @@ pub struct mbedtls_x509_crt {
     pub private_ns_cert_type: ::std::os::raw::c_uchar,
     #[doc = "< Signature: hash of the tbs part signed with the private key."]
     pub private_sig: mbedtls_x509_buf,
-    #[doc = "< Internal representation of the MD algorithm of the signature algorithm, e.g. MBEDTLS_MD_SHA256"]
+    #[doc = "< Internal representation of the MD algorithm of the signature algorithm, e.g. \
+             MBEDTLS_MD_SHA256"]
     pub private_sig_md: mbedtls_md_type_t,
-    #[doc = "< Internal representation of the Public Key algorithm of the signature algorithm, e.g. MBEDTLS_PK_RSA"]
+    #[doc = "< Internal representation of the Public Key algorithm of the signature algorithm, \
+             e.g. MBEDTLS_PK_RSA"]
     pub private_sig_pk: mbedtls_pk_sigalg_t,
-    #[doc = " Next certificate in the linked list that constitutes the CA chain.\n \\p NULL indicates the end of the list.\n Do not modify this field directly."]
+    #[doc = " Next certificate in the linked list that constitutes the CA chain.\n \\p NULL \
+             indicates the end of the list.\n Do not modify this field directly."]
     pub next: *mut mbedtls_x509_crt,
 }
 impl Default for mbedtls_x509_crt {
@@ -5515,13 +5921,26 @@ impl Default for mbedtls_x509_crt {
         }
     }
 }
-#[doc = " Security profile for certificate verification.\n\n All lists are bitfields, built by ORing flags from MBEDTLS_X509_ID_FLAG().\n\n The fields of this structure are part of the public API and can be\n manipulated directly by applications. Future versions of the library may\n add extra fields or reorder existing fields.\n\n You can create custom profiles by starting from a copy of\n an existing profile, such as mbedtls_x509_crt_profile_default or\n mbedtls_x509_ctr_profile_none and then tune it to your needs.\n\n For example to allow SHA-224 in addition to the default:\n\n  mbedtls_x509_crt_profile my_profile = mbedtls_x509_crt_profile_default;\n  my_profile.allowed_mds |= MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA224 );\n\n Or to allow only RSA-3072+ with SHA-256:\n\n  mbedtls_x509_crt_profile my_profile = mbedtls_x509_crt_profile_none;\n  my_profile.allowed_mds = MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 );\n  my_profile.allowed_pks = MBEDTLS_X509_ID_FLAG( MBEDTLS_PK_RSA );\n  my_profile.rsa_min_bitlen = 3072;"]
+#[doc = " Security profile for certificate verification.\n\n All lists are bitfields, built by \
+         ORing flags from MBEDTLS_X509_ID_FLAG().\n\n The fields of this structure are part of the \
+         public API and can be\n manipulated directly by applications. Future versions of the \
+         library may\n add extra fields or reorder existing fields.\n\n You can create custom \
+         profiles by starting from a copy of\n an existing profile, such as \
+         mbedtls_x509_crt_profile_default or\n mbedtls_x509_ctr_profile_none and then tune it to \
+         your needs.\n\n For example to allow SHA-224 in addition to the default:\n\n  \
+         mbedtls_x509_crt_profile my_profile = mbedtls_x509_crt_profile_default;\n  \
+         my_profile.allowed_mds |= MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA224 );\n\n Or to allow only \
+         RSA-3072+ with SHA-256:\n\n  mbedtls_x509_crt_profile my_profile = \
+         mbedtls_x509_crt_profile_none;\n  my_profile.allowed_mds = MBEDTLS_X509_ID_FLAG( \
+         MBEDTLS_MD_SHA256 );\n  my_profile.allowed_pks = MBEDTLS_X509_ID_FLAG( MBEDTLS_PK_RSA \
+         );\n  my_profile.rsa_min_bitlen = 3072;"]
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct mbedtls_x509_crt_profile {
     #[doc = "< MDs for signatures"]
     pub allowed_mds: u32,
-    #[doc = "< PK algs for public keys;\n   this applies to all certificates\n   in the provided chain."]
+    #[doc = "< PK algs for public keys;\n   this applies to all certificates\n   in the provided \
+             chain."]
     pub allowed_pks: u32,
     #[doc = "< Elliptic curves for ECDSA"]
     pub allowed_curves: u32,
@@ -5554,7 +5973,11 @@ impl Default for mbedtls_x509write_cert {
     }
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set Subject Alternative Name\n\n \\param ctx       Certificate context to use\n \\param san_list  List of SAN values\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY\n\n \\note            \"dnsName\", \"uniformResourceIdentifier\", \"IP address\",\n                  \"otherName\", and \"DirectoryName\", as defined in RFC 5280,\n                  are supported."]
+    #[doc = " \\brief           Set Subject Alternative Name\n\n \\param ctx       Certificate \
+             context to use\n \\param san_list  List of SAN values\n\n \\return          0 if \
+             successful, or #PSA_ERROR_INSUFFICIENT_MEMORY\n\n \\note            \"dnsName\", \
+             \"uniformResourceIdentifier\", \"IP address\",\n                  \"otherName\", and \
+             \"DirectoryName\", as defined in RFC 5280,\n                  are supported."]
     pub fn mbedtls_x509write_crt_set_subject_alternative_name(
         ctx: *mut mbedtls_x509write_cert,
         san_list: *const mbedtls_x509_san_list,
@@ -5640,7 +6063,16 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Load one or more certificates and add them\n                 to the chained list. Parses permissively. If some\n                 certificates can be parsed, the result is the number\n                 of failed certificates it encountered. If none complete\n                 correctly, the first error is returned.\n\n \\note           The PSA crypto subsystem must have been initialized by\n                 calling psa_crypto_init() before calling this function.\n\n \\param chain    points to the start of the chain\n \\param path     filename to read the certificates from\n\n \\return         0 if all certificates parsed successfully, a positive number\n                 if partly successful or a specific X509 or PEM error code"]
+    #[doc = " \\brief          Load one or more certificates and add them\n                 to the \
+             chained list. Parses permissively. If some\n                 certificates can be \
+             parsed, the result is the number\n                 of failed certificates it \
+             encountered. If none complete\n                 correctly, the first error is \
+             returned.\n\n \\note           The PSA crypto subsystem must have been initialized \
+             by\n                 calling psa_crypto_init() before calling this function.\n\n \
+             \\param chain    points to the start of the chain\n \\param path     filename to read \
+             the certificates from\n\n \\return         0 if all certificates parsed successfully, \
+             a positive number\n                 if partly successful or a specific X509 or PEM \
+             error code"]
     pub fn mbedtls_x509_crt_parse_file(
         chain: *mut mbedtls_x509_crt,
         path: *const ::std::os::raw::c_char,
@@ -5663,7 +6095,12 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Returns an informational string about the\n                 verification status of a certificate.\n\n \\param buf      Buffer to write to\n \\param size     Maximum size of buffer\n \\param prefix   A line prefix\n \\param flags    Verification flags created by mbedtls_x509_crt_verify()\n\n \\return         The length of the string written (not including the\n                 terminated nul byte), or a negative error code."]
+    #[doc = " \\brief          Returns an informational string about the\n                 \
+             verification status of a certificate.\n\n \\param buf      Buffer to write to\n \
+             \\param size     Maximum size of buffer\n \\param prefix   A line prefix\n \\param \
+             flags    Verification flags created by mbedtls_x509_crt_verify()\n\n \\return         \
+             The length of the string written (not including the\n                 terminated nul \
+             byte), or a negative error code."]
     pub fn mbedtls_x509_crt_verify_info(
         buf: *mut ::std::os::raw::c_char,
         size: usize,
@@ -5740,14 +6177,32 @@ pub type mbedtls_x509_crt_ca_cb_t = ::std::option::Option<
     ) -> ::std::os::raw::c_int,
 >;
 unsafe extern "C" {
-    #[doc = " \\brief          Check usage of certificate against keyUsage extension.\n\n \\param crt      Leaf certificate used.\n \\param usage    Intended usage(s) (eg MBEDTLS_X509_KU_KEY_ENCIPHERMENT\n                 before using the certificate to perform an RSA key\n                 exchange).\n\n \\note           Except for decipherOnly and encipherOnly, a bit set in the\n                 usage argument means this bit MUST be set in the\n                 certificate. For decipherOnly and encipherOnly, it means\n                 that bit MAY be set.\n\n \\return         0 is these uses of the certificate are allowed,\n                 #MBEDTLS_ERR_X509_BAD_INPUT_DATA if the keyUsage extension\n                 is present but does not match the usage argument.\n\n \\note           You should only call this function on leaf certificates, on\n                 (intermediate) CAs the keyUsage extension is automatically\n                 checked by \\c mbedtls_x509_crt_verify()."]
+    #[doc = " \\brief          Check usage of certificate against keyUsage extension.\n\n \\param \
+             crt      Leaf certificate used.\n \\param usage    Intended usage(s) (eg \
+             MBEDTLS_X509_KU_KEY_ENCIPHERMENT\n                 before using the certificate to \
+             perform an RSA key\n                 exchange).\n\n \\note           Except for \
+             decipherOnly and encipherOnly, a bit set in the\n                 usage argument \
+             means this bit MUST be set in the\n                 certificate. For decipherOnly and \
+             encipherOnly, it means\n                 that bit MAY be set.\n\n \\return         0 \
+             is these uses of the certificate are allowed,\n                 \
+             #MBEDTLS_ERR_X509_BAD_INPUT_DATA if the keyUsage extension\n                 is \
+             present but does not match the usage argument.\n\n \\note           You should only \
+             call this function on leaf certificates, on\n                 (intermediate) CAs the \
+             keyUsage extension is automatically\n                 checked by \\c \
+             mbedtls_x509_crt_verify()."]
     pub fn mbedtls_x509_crt_check_key_usage(
         crt: *const mbedtls_x509_crt,
         usage: ::std::os::raw::c_uint,
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Check usage of certificate against extendedKeyUsage.\n\n \\param crt       Leaf certificate used.\n \\param usage_oid Intended usage (eg MBEDTLS_OID_SERVER_AUTH or\n                  MBEDTLS_OID_CLIENT_AUTH).\n \\param usage_len Length of usage_oid (eg given by MBEDTLS_OID_SIZE()).\n\n \\return          0 if this use of the certificate is allowed,\n                  #MBEDTLS_ERR_X509_BAD_INPUT_DATA if not.\n\n \\note            Usually only makes sense on leaf certificates."]
+    #[doc = " \\brief           Check usage of certificate against extendedKeyUsage.\n\n \\param \
+             crt       Leaf certificate used.\n \\param usage_oid Intended usage (eg \
+             MBEDTLS_OID_SERVER_AUTH or\n                  MBEDTLS_OID_CLIENT_AUTH).\n \\param \
+             usage_len Length of usage_oid (eg given by MBEDTLS_OID_SIZE()).\n\n \\return          \
+             0 if this use of the certificate is allowed,\n                  \
+             #MBEDTLS_ERR_X509_BAD_INPUT_DATA if not.\n\n \\note            Usually only makes \
+             sense on leaf certificates."]
     pub fn mbedtls_x509_crt_check_extended_key_usage(
         crt: *const mbedtls_x509_crt,
         usage_oid: *const ::std::os::raw::c_char,
@@ -5762,11 +6217,13 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Initialize a certificate (chain)\n\n \\param crt      Certificate chain to initialize"]
+    #[doc = " \\brief          Initialize a certificate (chain)\n\n \\param crt      Certificate \
+             chain to initialize"]
     pub fn mbedtls_x509_crt_init(crt: *mut mbedtls_x509_crt);
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Unallocate all certificate data\n\n \\param crt      Certificate chain to free"]
+    #[doc = " \\brief          Unallocate all certificate data\n\n \\param crt      Certificate \
+             chain to free"]
     pub fn mbedtls_x509_crt_free(crt: *mut mbedtls_x509_crt);
 }
 unsafe extern "C" {
@@ -5774,7 +6231,8 @@ unsafe extern "C" {
     pub fn mbedtls_x509_crt_get_ca_istrue(crt: *const mbedtls_x509_crt) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Initialize a CRT writing context\n\n \\param ctx       CRT context to initialize"]
+    #[doc = " \\brief           Initialize a CRT writing context\n\n \\param ctx       CRT context \
+             to initialize"]
     pub fn mbedtls_x509write_crt_init(ctx: *mut mbedtls_x509write_cert);
 }
 unsafe extern "C" {
@@ -5785,7 +6243,13 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the serial number for a Certificate.\n\n \\param ctx          CRT context to use\n \\param serial       A raw array of bytes containing the serial number in big\n                     endian format\n \\param serial_len   Length of valid bytes (expressed in bytes) in \\p serial\n                     input buffer\n\n \\return          0 if successful, or\n                  #MBEDTLS_ERR_X509_BAD_INPUT_DATA if the provided input buffer\n                  is too big (longer than MBEDTLS_X509_RFC5280_MAX_SERIAL_LEN)"]
+    #[doc = " \\brief           Set the serial number for a Certificate.\n\n \\param ctx          \
+             CRT context to use\n \\param serial       A raw array of bytes containing the serial \
+             number in big\n                     endian format\n \\param serial_len   Length of \
+             valid bytes (expressed in bytes) in \\p serial\n                     input buffer\n\n \
+             \\return          0 if successful, or\n                  \
+             #MBEDTLS_ERR_X509_BAD_INPUT_DATA if the provided input buffer\n                  is \
+             too big (longer than MBEDTLS_X509_RFC5280_MAX_SERIAL_LEN)"]
     pub fn mbedtls_x509write_crt_set_serial_raw(
         ctx: *mut mbedtls_x509write_cert,
         serial: *const ::std::os::raw::c_uchar,
@@ -5822,14 +6286,17 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the issuer key used for signing the certificate\n\n \\param ctx       CRT context to use\n \\param key       private key to sign with"]
+    #[doc = " \\brief           Set the issuer key used for signing the certificate\n\n \\param \
+             ctx       CRT context to use\n \\param key       private key to sign with"]
     pub fn mbedtls_x509write_crt_set_issuer_key(
         ctx: *mut mbedtls_x509write_cert,
         key: *mut mbedtls_pk_context,
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the MD algorithm to use for the signature\n                  (e.g. MBEDTLS_MD_SHA1)\n\n \\param ctx       CRT context to use\n \\param md_alg    MD algorithm to use"]
+    #[doc = " \\brief           Set the MD algorithm to use for the signature\n                  \
+             (e.g. MBEDTLS_MD_SHA1)\n\n \\param ctx       CRT context to use\n \\param md_alg    \
+             MD algorithm to use"]
     pub fn mbedtls_x509write_crt_set_md_alg(
         ctx: *mut mbedtls_x509write_cert,
         md_alg: mbedtls_md_type_t,
@@ -5874,21 +6341,29 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the Extended Key Usage Extension\n                  (e.g. MBEDTLS_OID_SERVER_AUTH)\n\n \\param ctx       CRT context to use\n \\param exts      extended key usage extensions to set, a sequence of\n                  MBEDTLS_ASN1_OID objects\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY"]
+    #[doc = " \\brief           Set the Extended Key Usage Extension\n                  (e.g. \
+             MBEDTLS_OID_SERVER_AUTH)\n\n \\param ctx       CRT context to use\n \\param exts      \
+             extended key usage extensions to set, a sequence of\n                  \
+             MBEDTLS_ASN1_OID objects\n\n \\return          0 if successful, or \
+             #PSA_ERROR_INSUFFICIENT_MEMORY"]
     pub fn mbedtls_x509write_crt_set_ext_key_usage(
         ctx: *mut mbedtls_x509write_cert,
         exts: *const mbedtls_asn1_sequence,
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the Netscape Cert Type flags\n                  (e.g. MBEDTLS_X509_NS_CERT_TYPE_SSL_CLIENT | MBEDTLS_X509_NS_CERT_TYPE_EMAIL)\n\n \\param ctx           CRT context to use\n \\param ns_cert_type  Netscape Cert Type flags to set\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY"]
+    #[doc = " \\brief           Set the Netscape Cert Type flags\n                  (e.g. \
+             MBEDTLS_X509_NS_CERT_TYPE_SSL_CLIENT | MBEDTLS_X509_NS_CERT_TYPE_EMAIL)\n\n \\param \
+             ctx           CRT context to use\n \\param ns_cert_type  Netscape Cert Type flags to \
+             set\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY"]
     pub fn mbedtls_x509write_crt_set_ns_cert_type(
         ctx: *mut mbedtls_x509write_cert,
         ns_cert_type: ::std::os::raw::c_uchar,
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Free the contents of a CRT write context\n\n \\param ctx       CRT context to free"]
+    #[doc = " \\brief           Free the contents of a CRT write context\n\n \\param ctx       CRT \
+             context to free"]
     pub fn mbedtls_x509write_crt_free(ctx: *mut mbedtls_x509write_cert);
 }
 unsafe extern "C" {
@@ -5965,7 +6440,17 @@ pub type mbedtls_ssl_send_t = ::std::option::Option<
         len: usize,
     ) -> ::std::os::raw::c_int,
 >;
-#[doc = " \\brief          Callback type: receive data from the network.\n\n \\note           That callback may be either blocking or non-blocking.\n\n \\param ctx      Context for the receive callback (typically a file\n                 descriptor)\n \\param buf      Buffer to write the received data to\n \\param len      Length of the receive buffer\n\n \\returns        If data has been received, the positive number of bytes received.\n \\returns        \\c 0 if the connection has been closed.\n \\returns        If performing non-blocking I/O, \\c MBEDTLS_ERR_SSL_WANT_READ\n                 must be returned when the operation would block.\n \\returns        Another negative error code on other kinds of failures.\n\n \\note           The callback may receive fewer bytes than the length of the\n                 buffer. It must always return the number of bytes actually\n                 received and written to the buffer."]
+#[doc = " \\brief          Callback type: receive data from the network.\n\n \\note           That \
+         callback may be either blocking or non-blocking.\n\n \\param ctx      Context for the \
+         receive callback (typically a file\n                 descriptor)\n \\param buf      \
+         Buffer to write the received data to\n \\param len      Length of the receive buffer\n\n \
+         \\returns        If data has been received, the positive number of bytes received.\n \
+         \\returns        \\c 0 if the connection has been closed.\n \\returns        If \
+         performing non-blocking I/O, \\c MBEDTLS_ERR_SSL_WANT_READ\n                 must be \
+         returned when the operation would block.\n \\returns        Another negative error code \
+         on other kinds of failures.\n\n \\note           The callback may receive fewer bytes \
+         than the length of the\n                 buffer. It must always return the number of \
+         bytes actually\n                 received and written to the buffer."]
 pub type mbedtls_ssl_recv_t = ::std::option::Option<
     unsafe extern "C" fn(
         ctx: *mut ::std::os::raw::c_void,
@@ -5986,7 +6471,11 @@ pub type mbedtls_ssl_recv_timeout_t = ::std::option::Option<
 pub type mbedtls_ssl_set_timer_t = ::std::option::Option<
     unsafe extern "C" fn(ctx: *mut ::std::os::raw::c_void, int_ms: u32, fin_ms: u32),
 >;
-#[doc = " \\brief          Callback type: get status of timers/delays\n\n \\param ctx      Context pointer\n\n \\return         This callback must return:\n                 -1 if cancelled (fin_ms == 0),\n                  0 if none of the delays have passed,\n                  1 if only the intermediate delay has passed,\n                  2 if the final delay has passed."]
+#[doc = " \\brief          Callback type: get status of timers/delays\n\n \\param ctx      Context \
+         pointer\n\n \\return         This callback must return:\n                 -1 if cancelled \
+         (fin_ms == 0),\n                  0 if none of the delays have passed,\n                  \
+         1 if only the intermediate delay has passed,\n                  2 if the final delay has \
+         passed."]
 pub type mbedtls_ssl_get_timer_t = ::std::option::Option<
     unsafe extern "C" fn(ctx: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_int,
 >;
@@ -6065,7 +6554,8 @@ pub struct mbedtls_ssl_session {
     pub private_exported: ::std::os::raw::c_uchar,
     #[doc = "< 0: client, 1: server"]
     pub private_endpoint: u8,
-    #[doc = " TLS version negotiated in the session. Used if and when renegotiating\n  or resuming a session instead of the configured minor TLS version."]
+    #[doc = " TLS version negotiated in the session. Used if and when renegotiating\n  or \
+             resuming a session instead of the configured minor TLS version."]
     pub private_tls_version: mbedtls_ssl_protocol_version,
     #[doc = "< start time of current session"]
     pub private_start: mbedtls_time_t,
@@ -6087,7 +6577,19 @@ pub struct mbedtls_ssl_session {
     pub private_ticket_len: usize,
     #[doc = "< ticket lifetime hint"]
     pub private_ticket_lifetime: u32,
-    #[doc = " When a ticket is created by a TLS server as part of an established TLS\n  session, the ticket creation time may need to be saved for the ticket\n  module to be able to check the ticket age when the ticket is used.\n  That's the purpose of this field.\n  Before creating a new ticket, an Mbed TLS server set this field with\n  its current time in milliseconds. This time may then be saved in the\n  session ticket data by the session ticket writing function and\n  recovered by the ticket parsing function later when the ticket is used.\n  The ticket module may then use this time to compute the ticket age and\n  determine if it has expired or not.\n  The Mbed TLS implementations of the session ticket writing and parsing\n  functions save and retrieve the ticket creation time as part of the\n  session ticket data. The session ticket parsing function relies on\n  the mbedtls_ssl_session_get_ticket_creation_time() API to get the\n  ticket creation time from the session ticket data."]
+    #[doc = " When a ticket is created by a TLS server as part of an established TLS\n  session, \
+             the ticket creation time may need to be saved for the ticket\n  module to be able to \
+             check the ticket age when the ticket is used.\n  That's the purpose of this field.\n  \
+             Before creating a new ticket, an Mbed TLS server set this field with\n  its current \
+             time in milliseconds. This time may then be saved in the\n  session ticket data by \
+             the session ticket writing function and\n  recovered by the ticket parsing function \
+             later when the ticket is used.\n  The ticket module may then use this time to \
+             compute the ticket age and\n  determine if it has expired or not.\n  The Mbed TLS \
+             implementations of the session ticket writing and parsing\n  functions save and \
+             retrieve the ticket creation time as part of the\n  session ticket data. The session \
+             ticket parsing function relies on\n  the \
+             mbedtls_ssl_session_get_ticket_creation_time() API to get the\n  ticket creation \
+             time from the session ticket data."]
     pub private_ticket_creation_time: mbedtls_ms_time_t,
     #[doc = "< Randomly generated value used to obscure the age of the ticket"]
     pub private_ticket_age_add: u32,
@@ -6310,15 +6812,25 @@ pub struct mbedtls_ssl_config {
     pub private_sig_algs: *const u16,
     #[doc = "< allowed IANA NamedGroups"]
     pub private_group_list: *const u16,
-    #[doc = "< PSA key slot holding opaque PSK. This field\n   should only be set via\n   mbedtls_ssl_conf_psk_opaque().\n   If either no PSK or a raw PSK have been\n   configured, this has value \\c 0."]
+    #[doc = "< PSA key slot holding opaque PSK. This field\n   should only be set via\n   \
+             mbedtls_ssl_conf_psk_opaque().\n   If either no PSK or a raw PSK have been\n   \
+             configured, this has value \\c 0."]
     pub private_psk_opaque: mbedtls_svc_key_id_t,
-    #[doc = "< The raw pre-shared key. This field should\n   only be set via mbedtls_ssl_conf_psk().\n   If either no PSK or an opaque PSK\n   have been configured, this has value NULL."]
+    #[doc = "< The raw pre-shared key. This field should\n   only be set via \
+             mbedtls_ssl_conf_psk().\n   If either no PSK or an opaque PSK\n   have been \
+             configured, this has value NULL."]
     pub private_psk: *mut ::std::os::raw::c_uchar,
-    #[doc = "< The length of the raw pre-shared key.\n   This field should only be set via\n   mbedtls_ssl_conf_psk().\n   Its value is non-zero if and only if\n   \\c psk is not \\c NULL."]
+    #[doc = "< The length of the raw pre-shared key.\n   This field should only be set via\n   \
+             mbedtls_ssl_conf_psk().\n   Its value is non-zero if and only if\n   \\c psk is not \
+             \\c NULL."]
     pub private_psk_len: usize,
-    #[doc = "< The PSK identity for PSK negotiation.\n   This field should only be set via\n   mbedtls_ssl_conf_psk().\n   This is set if and only if either\n   \\c psk or \\c psk_opaque are set."]
+    #[doc = "< The PSK identity for PSK negotiation.\n   This field should only be set via\n   \
+             mbedtls_ssl_conf_psk().\n   This is set if and only if either\n   \\c psk or \\c \
+             psk_opaque are set."]
     pub private_psk_identity: *mut ::std::os::raw::c_uchar,
-    #[doc = "< The length of PSK identity.\n   This field should only be set via\n   mbedtls_ssl_conf_psk().\n   Its value is non-zero if and only if\n   \\c psk is not \\c NULL or \\c psk_opaque\n   is not \\c 0."]
+    #[doc = "< The length of PSK identity.\n   This field should only be set via\n   \
+             mbedtls_ssl_conf_psk().\n   Its value is non-zero if and only if\n   \\c psk is not \
+             \\c NULL or \\c psk_opaque\n   is not \\c 0."]
     pub private_psk_identity_len: usize,
     #[doc = "< ordered list of protocols"]
     pub private_alpn_list: *const *const ::std::os::raw::c_char,
@@ -6334,7 +6846,8 @@ pub struct mbedtls_ssl_config {
     pub private_renego_period: [::std::os::raw::c_uchar; 8usize],
     #[doc = "< limit of records with a bad MAC"]
     pub private_badmac_limit: ::std::os::raw::c_uint,
-    #[doc = " User data pointer or handle.\n\n The library sets this to \\p 0 when creating a context and does not\n access it afterwards."]
+    #[doc = " User data pointer or handle.\n\n The library sets this to \\p 0 when creating a \
+             context and does not\n access it afterwards."]
     pub private_user_data: mbedtls_ssl_user_data_t,
     #[doc = "< certificate selection callback"]
     pub private_f_cert_cb: mbedtls_ssl_hs_cb_t,
@@ -6357,13 +6870,22 @@ pub struct mbedtls_ssl_context {
     pub private_conf: *const mbedtls_ssl_config,
     #[doc = "< SSL handshake: current state"]
     pub private_state: ::std::os::raw::c_int,
-    #[doc = " Mask of `MBEDTLS_SSL_CONTEXT_FLAG_XXX`.\n See `mbedtls_ssl_context_flags_t` in ssl_misc.h.\n\n This field is not saved by mbedtls_ssl_session_save()."]
+    #[doc = " Mask of `MBEDTLS_SSL_CONTEXT_FLAG_XXX`.\n See `mbedtls_ssl_context_flags_t` in \
+             ssl_misc.h.\n\n This field is not saved by mbedtls_ssl_session_save()."]
     pub private_flags: u32,
     #[doc = "< Initial, in progress, pending?"]
     pub private_renego_status: ::std::os::raw::c_int,
-    #[doc = "< Records since renego request, or with DTLS,\nnumber of retransmissions of request if\nrenego_max_records is < 0"]
+    #[doc = "< Records since renego request, or with DTLS,\nnumber of retransmissions of request \
+             if\nrenego_max_records is < 0"]
     pub private_renego_records_seen: ::std::os::raw::c_int,
-    #[doc = " Maximum TLS version to be negotiated, then negotiated TLS version.\n\n It is initialized as the configured maximum TLS version to be\n negotiated by mbedtls_ssl_setup().\n\n When renegotiating or resuming a session, it is overwritten in the\n ClientHello writing preparation stage with the previously negotiated\n TLS version.\n\n On client side, it is updated to the TLS version selected by the server\n for the handshake when the ServerHello is received.\n\n On server side, it is updated to the TLS version the server selects for\n the handshake when the ClientHello is received."]
+    #[doc = " Maximum TLS version to be negotiated, then negotiated TLS version.\n\n It is \
+             initialized as the configured maximum TLS version to be\n negotiated by \
+             mbedtls_ssl_setup().\n\n When renegotiating or resuming a session, it is overwritten \
+             in the\n ClientHello writing preparation stage with the previously negotiated\n TLS \
+             version.\n\n On client side, it is updated to the TLS version selected by the \
+             server\n for the handshake when the ServerHello is received.\n\n On server side, it \
+             is updated to the TLS version the server selects for\n the handshake when the \
+             ClientHello is received."]
     pub private_tls_version: mbedtls_ssl_protocol_version,
     #[doc = "< records with a bad MAC received"]
     pub private_badmac_seen: ::std::os::raw::c_uint,
@@ -6395,15 +6917,20 @@ pub struct mbedtls_ssl_context {
     pub private_session_negotiate: *mut mbedtls_ssl_session,
     #[doc = "<  params required only during\nthe handshake process"]
     pub private_handshake: *mut mbedtls_ssl_handshake_params,
-    #[doc = "<  current transform params (in)\n    This is always a reference,\n    never an owning pointer."]
+    #[doc = "<  current transform params (in)\n    This is always a reference,\n    never an \
+             owning pointer."]
     pub private_transform_in: *mut mbedtls_ssl_transform,
-    #[doc = "<  current transform params (out)\n    This is always a reference,\n    never an owning pointer."]
+    #[doc = "<  current transform params (out)\n    This is always a reference,\n    never an \
+             owning pointer."]
     pub private_transform_out: *mut mbedtls_ssl_transform,
-    #[doc = "<  negotiated transform params\n    This pointer owns the transform\n    it references."]
+    #[doc = "<  negotiated transform params\n    This pointer owns the transform\n    it \
+             references."]
     pub private_transform: *mut mbedtls_ssl_transform,
-    #[doc = "<  transform params in negotiation\n    This pointer owns the transform\n    it references."]
+    #[doc = "<  transform params in negotiation\n    This pointer owns the transform\n    it \
+             references."]
     pub private_transform_negotiate: *mut mbedtls_ssl_transform,
-    #[doc = " The application data transform in TLS 1.3.\n  This pointer owns the transform it references."]
+    #[doc = " The application data transform in TLS 1.3.\n  This pointer owns the transform it \
+             references."]
     pub private_transform_application: *mut mbedtls_ssl_transform,
     #[doc = "< context for the timer callbacks"]
     pub private_p_timer: *mut ::std::os::raw::c_void,
@@ -6449,7 +6976,8 @@ pub struct mbedtls_ssl_context {
     pub private_nb_zero: ::std::os::raw::c_int,
     #[doc = "< drop or reuse current message\non next call to record layer?"]
     pub private_keep_current_message: ::std::os::raw::c_int,
-    #[doc = "< Determines if a fatal alert\nshould be sent. Values:\n- \\c 0 , no alert is to be sent.\n- \\c 1 , alert is to be sent."]
+    #[doc = "< Determines if a fatal alert\nshould be sent. Values:\n- \\c 0 , no alert is to be \
+             sent.\n- \\c 1 , alert is to be sent."]
     pub private_send_alert: ::std::os::raw::c_uchar,
     #[doc = "< Type of alert if send_alert\n= 0"]
     pub private_alert_type: ::std::os::raw::c_uchar,
@@ -6497,17 +7025,24 @@ pub struct mbedtls_ssl_context {
     pub private_own_verify_data: [::std::os::raw::c_char; 12usize],
     #[doc = "<  previous handshake verify data"]
     pub private_peer_verify_data: [::std::os::raw::c_char; 12usize],
-    #[doc = " The next incoming CID, chosen by the user and applying to\n  all subsequent handshakes. This may be different from the\n  CID currently used in case the user has re-configured the CID\n  after an initial handshake."]
+    #[doc = " The next incoming CID, chosen by the user and applying to\n  all subsequent \
+             handshakes. This may be different from the\n  CID currently used in case the user \
+             has re-configured the CID\n  after an initial handshake."]
     pub private_own_cid: [::std::os::raw::c_uchar; 32usize],
     #[doc = "< The length of \\c own_cid."]
     pub private_own_cid_len: u8,
-    #[doc = "< This indicates whether the CID extension should\n   be negotiated in the next handshake or not.\n   Possible values are #MBEDTLS_SSL_CID_ENABLED\n   and #MBEDTLS_SSL_CID_DISABLED."]
+    #[doc = "< This indicates whether the CID extension should\n   be negotiated in the next \
+             handshake or not.\n   Possible values are #MBEDTLS_SSL_CID_ENABLED\n   and \
+             #MBEDTLS_SSL_CID_DISABLED."]
     pub private_negotiate_cid: u8,
     #[doc = " Callback to export key block and master secret"]
     pub private_f_export_keys: mbedtls_ssl_export_keys_t,
     #[doc = "< context for key export callback"]
     pub private_p_export_keys: *mut ::std::os::raw::c_void,
-    #[doc = " User data pointer or handle.\n\n The library sets this to \\p 0 when creating a context and does not\n access it afterwards.\n\n \\warning Serializing and restoring an SSL context with\n          mbedtls_ssl_context_save() and mbedtls_ssl_context_load()\n          does not currently restore the user data."]
+    #[doc = " User data pointer or handle.\n\n The library sets this to \\p 0 when creating a \
+             context and does not\n access it afterwards.\n\n \\warning Serializing and restoring \
+             an SSL context with\n          mbedtls_ssl_context_save() and \
+             mbedtls_ssl_context_load()\n          does not currently restore the user data."]
     pub private_user_data: mbedtls_ssl_user_data_t,
 }
 impl Default for mbedtls_ssl_context {
@@ -6547,7 +7082,9 @@ unsafe extern "C" {
     pub fn mbedtls_ssl_session_reset(ssl: *mut mbedtls_ssl_context) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the current endpoint type\n\n \\param conf     SSL configuration\n \\param endpoint must be MBEDTLS_SSL_IS_CLIENT or MBEDTLS_SSL_IS_SERVER"]
+    #[doc = " \\brief          Set the current endpoint type\n\n \\param conf     SSL \
+             configuration\n \\param endpoint must be MBEDTLS_SSL_IS_CLIENT or \
+             MBEDTLS_SSL_IS_SERVER"]
     pub fn mbedtls_ssl_conf_endpoint(
         conf: *mut mbedtls_ssl_config,
         endpoint: ::std::os::raw::c_int,
@@ -6568,7 +7105,15 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the verification callback (Optional).\n\n                 If set, the provided verify callback is called for each\n                 certificate in the peer's CRT chain, including the trusted\n                 root. For more information, please see the documentation of\n                 \\c mbedtls_x509_crt_verify().\n\n \\note           For per context callbacks and contexts, please use\n                 mbedtls_ssl_set_verify() instead.\n\n \\param conf     The SSL configuration to use.\n \\param f_vrfy   The verification callback to use during CRT verification.\n \\param p_vrfy   The opaque context to be passed to the callback."]
+    #[doc = " \\brief          Set the verification callback (Optional).\n\n                 If \
+             set, the provided verify callback is called for each\n                 certificate in \
+             the peer's CRT chain, including the trusted\n                 root. For more \
+             information, please see the documentation of\n                 \\c \
+             mbedtls_x509_crt_verify().\n\n \\note           For per context callbacks and \
+             contexts, please use\n                 mbedtls_ssl_set_verify() instead.\n\n \\param \
+             conf     The SSL configuration to use.\n \\param f_vrfy   The verification callback \
+             to use during CRT verification.\n \\param p_vrfy   The opaque context to be passed to \
+             the callback."]
     pub fn mbedtls_ssl_conf_verify(
         conf: *mut mbedtls_ssl_config,
         f_vrfy: ::std::option::Option<
@@ -6583,7 +7128,12 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the debug callback\n\n                 The callback has the following argument:\n                 void *           opaque context for the callback\n                 int              debug level\n                 const char *     file name\n                 int              line number\n                 const char *     message\n\n \\param conf     SSL configuration\n \\param f_dbg    debug function\n \\param p_dbg    debug parameter"]
+    #[doc = " \\brief          Set the debug callback\n\n                 The callback has the \
+             following argument:\n                 void *           opaque context for the \
+             callback\n                 int              debug level\n                 const char \
+             *     file name\n                 int              line number\n                 \
+             const char *     message\n\n \\param conf     SSL configuration\n \\param f_dbg    \
+             debug function\n \\param p_dbg    debug parameter"]
     pub fn mbedtls_ssl_conf_dbg(
         conf: *mut mbedtls_ssl_config,
         f_dbg: ::std::option::Option<
@@ -6655,7 +7205,16 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the timeout period for mbedtls_ssl_read()\n                 (Default: no timeout.)\n\n \\param conf     SSL configuration context\n \\param timeout  Timeout value in milliseconds.\n                 Use 0 for no timeout (default).\n\n \\note           With blocking I/O, this will only work if a non-NULL\n                 \\c f_recv_timeout was set with \\c mbedtls_ssl_set_bio().\n                 With non-blocking I/O, this will only work if timer\n                 callbacks were set with \\c mbedtls_ssl_set_timer_cb().\n\n \\note           With non-blocking I/O, you may also skip this function\n                 altogether and handle timeouts at the application layer."]
+    #[doc = " \\brief          Set the timeout period for mbedtls_ssl_read()\n                 \
+             (Default: no timeout.)\n\n \\param conf     SSL configuration context\n \\param \
+             timeout  Timeout value in milliseconds.\n                 Use 0 for no timeout \
+             (default).\n\n \\note           With blocking I/O, this will only work if a \
+             non-NULL\n                 \\c f_recv_timeout was set with \\c \
+             mbedtls_ssl_set_bio().\n                 With non-blocking I/O, this will only work \
+             if timer\n                 callbacks were set with \\c \
+             mbedtls_ssl_set_timer_cb().\n\n \\note           With non-blocking I/O, you may also \
+             skip this function\n                 altogether and handle timeouts at the \
+             application layer."]
     pub fn mbedtls_ssl_conf_read_timeout(conf: *mut mbedtls_ssl_config, timeout: u32);
 }
 unsafe extern "C" {
@@ -6675,7 +7234,16 @@ unsafe extern "C" {
         f_get_timer: mbedtls_ssl_get_timer_t,
     );
 }
-#[doc = " \\brief           Callback type: generate and write session ticket\n\n \\note            This describes what a callback implementation should do.\n                  This callback should generate an encrypted and\n                  authenticated ticket for the session and write it to the\n                  output buffer. Here, ticket means the opaque ticket part\n                  of the NewSessionTicket structure of RFC 5077.\n\n \\param p_ticket  Context for the callback\n \\param session   SSL session to be written in the ticket\n \\param start     Start of the output buffer\n \\param end       End of the output buffer\n \\param tlen      On exit, holds the length written\n \\param lifetime  On exit, holds the lifetime of the ticket in seconds\n\n \\return          0 if successful, or\n                  a specific MBEDTLS_ERR_XXX code."]
+#[doc = " \\brief           Callback type: generate and write session ticket\n\n \\note            \
+         This describes what a callback implementation should do.\n                  This callback \
+         should generate an encrypted and\n                  authenticated ticket for the session \
+         and write it to the\n                  output buffer. Here, ticket means the opaque \
+         ticket part\n                  of the NewSessionTicket structure of RFC 5077.\n\n \\param \
+         p_ticket  Context for the callback\n \\param session   SSL session to be written in the \
+         ticket\n \\param start     Start of the output buffer\n \\param end       End of the \
+         output buffer\n \\param tlen      On exit, holds the length written\n \\param lifetime  \
+         On exit, holds the lifetime of the ticket in seconds\n\n \\return          0 if \
+         successful, or\n                  a specific MBEDTLS_ERR_XXX code."]
 pub type mbedtls_ssl_ticket_write_t = ::std::option::Option<
     unsafe extern "C" fn(
         p_ticket: *mut ::std::os::raw::c_void,
@@ -6686,7 +7254,19 @@ pub type mbedtls_ssl_ticket_write_t = ::std::option::Option<
         lifetime: *mut u32,
     ) -> ::std::os::raw::c_int,
 >;
-#[doc = " \\brief           Callback type: parse and load session ticket\n\n \\note            This describes what a callback implementation should do.\n                  This callback should parse a session ticket as generated\n                  by the corresponding mbedtls_ssl_ticket_write_t function,\n                  and, if the ticket is authentic and valid, load the\n                  session.\n\n \\note            The implementation is allowed to modify the first len\n                  bytes of the input buffer, eg to use it as a temporary\n                  area for the decrypted ticket contents.\n\n \\param p_ticket  Context for the callback\n \\param session   SSL session to be loaded\n \\param buf       Start of the buffer containing the ticket\n \\param len       Length of the ticket.\n\n \\return          0 if successful, or\n                  MBEDTLS_ERR_SSL_INVALID_MAC if not authentic, or\n                  MBEDTLS_ERR_SSL_SESSION_TICKET_EXPIRED if expired, or\n                  any other non-zero code for other failures."]
+#[doc = " \\brief           Callback type: parse and load session ticket\n\n \\note            \
+         This describes what a callback implementation should do.\n                  This callback \
+         should parse a session ticket as generated\n                  by the corresponding \
+         mbedtls_ssl_ticket_write_t function,\n                  and, if the ticket is authentic \
+         and valid, load the\n                  session.\n\n \\note            The implementation \
+         is allowed to modify the first len\n                  bytes of the input buffer, eg to \
+         use it as a temporary\n                  area for the decrypted ticket contents.\n\n \
+         \\param p_ticket  Context for the callback\n \\param session   SSL session to be loaded\n \
+         \\param buf       Start of the buffer containing the ticket\n \\param len       Length of \
+         the ticket.\n\n \\return          0 if successful, or\n                  \
+         MBEDTLS_ERR_SSL_INVALID_MAC if not authentic, or\n                  \
+         MBEDTLS_ERR_SSL_SESSION_TICKET_EXPIRED if expired, or\n                  any other \
+         non-zero code for other failures."]
 pub type mbedtls_ssl_ticket_parse_t = ::std::option::Option<
     unsafe extern "C" fn(
         p_ticket: *mut ::std::os::raw::c_void,
@@ -6712,7 +7292,13 @@ unsafe extern "C" {
         p_export_keys: *mut ::std::os::raw::c_void,
     );
 }
-#[doc = " \\brief          Callback type: generate a cookie\n\n \\param ctx      Context for the callback\n \\param p        Buffer to write to,\n                 must be updated to point right after the cookie\n \\param end      Pointer to one past the end of the output buffer\n \\param info     Client ID info that was passed to\n                 \\c mbedtls_ssl_set_client_transport_id()\n \\param ilen     Length of info in bytes\n\n \\return         The callback must return 0 on success,\n                 or a negative error code."]
+#[doc = " \\brief          Callback type: generate a cookie\n\n \\param ctx      Context for the \
+         callback\n \\param p        Buffer to write to,\n                 must be updated to \
+         point right after the cookie\n \\param end      Pointer to one past the end of the output \
+         buffer\n \\param info     Client ID info that was passed to\n                 \\c \
+         mbedtls_ssl_set_client_transport_id()\n \\param ilen     Length of info in bytes\n\n \
+         \\return         The callback must return 0 on success,\n                 or a negative \
+         error code."]
 pub type mbedtls_ssl_cookie_write_t = ::std::option::Option<
     unsafe extern "C" fn(
         ctx: *mut ::std::os::raw::c_void,
@@ -6722,7 +7308,12 @@ pub type mbedtls_ssl_cookie_write_t = ::std::option::Option<
         ilen: usize,
     ) -> ::std::os::raw::c_int,
 >;
-#[doc = " \\brief          Callback type: verify a cookie\n\n \\param ctx      Context for the callback\n \\param cookie   Cookie to verify\n \\param clen     Length of cookie\n \\param info     Client ID info that was passed to\n                 \\c mbedtls_ssl_set_client_transport_id()\n \\param ilen     Length of info in bytes\n\n \\return         The callback must return 0 if cookie is valid,\n                 or a negative error code."]
+#[doc = " \\brief          Callback type: verify a cookie\n\n \\param ctx      Context for the \
+         callback\n \\param cookie   Cookie to verify\n \\param clen     Length of cookie\n \
+         \\param info     Client ID info that was passed to\n                 \\c \
+         mbedtls_ssl_set_client_transport_id()\n \\param ilen     Length of info in bytes\n\n \
+         \\return         The callback must return 0 if cookie is valid,\n                 or a \
+         negative error code."]
 pub type mbedtls_ssl_cookie_check_t = ::std::option::Option<
     unsafe extern "C" fn(
         ctx: *mut ::std::os::raw::c_void,
@@ -6906,7 +7497,14 @@ unsafe extern "C" {
     pub fn mbedtls_ssl_conf_groups(conf: *mut mbedtls_ssl_config, groups: *const u16);
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Configure allowed signature algorithms for use in TLS\n\n \\param conf     The SSL configuration to use.\n \\param sig_algs List of allowed IANA values for TLS 1.3 signature algorithms,\n                 terminated by #MBEDTLS_TLS1_3_SIG_NONE. The list must remain\n                 available throughout the lifetime of the conf object.\n                 - For TLS 1.3, values of \\c MBEDTLS_TLS1_3_SIG_XXXX should be\n                   used.\n                 - For TLS 1.2, values should be given as\n                   \"(HashAlgorithm << 8) | SignatureAlgorithm\"."]
+    #[doc = " \\brief          Configure allowed signature algorithms for use in TLS\n\n \\param \
+             conf     The SSL configuration to use.\n \\param sig_algs List of allowed IANA values \
+             for TLS 1.3 signature algorithms,\n                 terminated by \
+             #MBEDTLS_TLS1_3_SIG_NONE. The list must remain\n                 available throughout \
+             the lifetime of the conf object.\n                 - For TLS 1.3, values of \\c \
+             MBEDTLS_TLS1_3_SIG_XXXX should be\n                   used.\n                 - For \
+             TLS 1.2, values should be given as\n                   \"(HashAlgorithm << 8) | \
+             SignatureAlgorithm\"."]
     pub fn mbedtls_ssl_conf_sig_algs(conf: *mut mbedtls_ssl_config, sig_algs: *const u16);
 }
 unsafe extern "C" {
@@ -7065,19 +7663,22 @@ unsafe extern "C" {
     pub fn mbedtls_ssl_get_verify_result(ssl: *const mbedtls_ssl_context) -> u32;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Return the id of the current ciphersuite\n\n \\param ssl      SSL context\n\n \\return         a ciphersuite id"]
+    #[doc = " \\brief          Return the id of the current ciphersuite\n\n \\param ssl      SSL \
+             context\n\n \\return         a ciphersuite id"]
     pub fn mbedtls_ssl_get_ciphersuite_id_from_ssl(
         ssl: *const mbedtls_ssl_context,
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Return the name of the current ciphersuite\n\n \\param ssl      SSL context\n\n \\return         a string containing the ciphersuite name"]
+    #[doc = " \\brief          Return the name of the current ciphersuite\n\n \\param ssl      SSL \
+             context\n\n \\return         a string containing the ciphersuite name"]
     pub fn mbedtls_ssl_get_ciphersuite(
         ssl: *const mbedtls_ssl_context,
     ) -> *const ::std::os::raw::c_char;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Return the current TLS version\n\n \\param ssl      SSL context\n\n \\return         a string containing the TLS version"]
+    #[doc = " \\brief          Return the current TLS version\n\n \\param ssl      SSL context\n\n \
+             \\return         a string containing the TLS version"]
     pub fn mbedtls_ssl_get_version(
         ssl: *const mbedtls_ssl_context,
     ) -> *const ::std::os::raw::c_char;
@@ -7152,7 +7753,8 @@ unsafe extern "C" {
     pub fn mbedtls_ssl_close_notify(ssl: *mut mbedtls_ssl_context) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Free referenced items in an SSL context and clear memory\n\n \\param ssl      SSL context"]
+    #[doc = " \\brief          Free referenced items in an SSL context and clear memory\n\n \
+             \\param ssl      SSL context"]
     pub fn mbedtls_ssl_free(ssl: *mut mbedtls_ssl_context);
 }
 unsafe extern "C" {
@@ -7173,7 +7775,11 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Initialize an SSL configuration context\n                 Just makes the context ready for\n                 mbedtls_ssl_config_defaults() or mbedtls_ssl_config_free().\n\n \\note           You need to call mbedtls_ssl_config_defaults() unless you\n                 manually set all of the relevant fields yourself.\n\n \\param conf     SSL configuration context"]
+    #[doc = " \\brief          Initialize an SSL configuration context\n                 Just \
+             makes the context ready for\n                 mbedtls_ssl_config_defaults() or \
+             mbedtls_ssl_config_free().\n\n \\note           You need to call \
+             mbedtls_ssl_config_defaults() unless you\n                 manually set all of the \
+             relevant fields yourself.\n\n \\param conf     SSL configuration context"]
     pub fn mbedtls_ssl_config_init(conf: *mut mbedtls_ssl_config);
 }
 unsafe extern "C" {
@@ -7186,7 +7792,8 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Free an SSL configuration context\n\n \\param conf     SSL configuration context"]
+    #[doc = " \\brief          Free an SSL configuration context\n\n \\param conf     SSL \
+             configuration context"]
     pub fn mbedtls_ssl_config_free(conf: *mut mbedtls_ssl_config);
 }
 unsafe extern "C" {
@@ -7228,22 +7835,30 @@ unsafe extern "C" {
     pub fn mbedtls_debug_set_threshold(threshold: ::std::os::raw::c_int);
 }
 unsafe extern "C" {
-    #[doc = " \\brief Translate an Mbed TLS error code into a string representation.\n        The result is truncated if necessary and always includes a\n        terminating null byte.\n\n \\param errnum    error code\n \\param buffer    buffer to place representation in\n \\param buflen    length of the buffer"]
+    #[doc = " \\brief Translate an Mbed TLS error code into a string representation.\n        The \
+             result is truncated if necessary and always includes a\n        terminating null \
+             byte.\n\n \\param errnum    error code\n \\param buffer    buffer to place \
+             representation in\n \\param buflen    length of the buffer"]
     pub fn mbedtls_strerror(
         errnum: ::std::os::raw::c_int,
         buffer: *mut ::std::os::raw::c_char,
         buflen: usize,
     );
 }
-#[doc = " Wrapper type for sockets.\n\n Currently backed by just a file descriptor, but might be more in the future\n (eg two file descriptors for combined IPv4 + IPv6 support, or additional\n structures for hand-made UDP demultiplexing)."]
+#[doc = " Wrapper type for sockets.\n\n Currently backed by just a file descriptor, but might be \
+         more in the future\n (eg two file descriptors for combined IPv4 + IPv6 support, or \
+         additional\n structures for hand-made UDP demultiplexing)."]
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct mbedtls_net_context {
-    #[doc = " The underlying file descriptor.\n\n This field is only guaranteed to be present on POSIX/Unix-like platforms.\n On other platforms, it may have a different type, have a different\n meaning, or be absent altogether."]
+    #[doc = " The underlying file descriptor.\n\n This field is only guaranteed to be present on \
+             POSIX/Unix-like platforms.\n On other platforms, it may have a different type, have \
+             a different\n meaning, or be absent altogether."]
     pub fd: ::std::os::raw::c_int,
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Initialize a context\n                 Just makes the context ready to be used or freed safely.\n\n \\param ctx      Context to initialize"]
+    #[doc = " \\brief          Initialize a context\n                 Just makes the context ready \
+             to be used or freed safely.\n\n \\param ctx      Context to initialize"]
     pub fn mbedtls_net_init(ctx: *mut mbedtls_net_context);
 }
 unsafe extern "C" {
@@ -7283,11 +7898,13 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the socket blocking\n\n \\param ctx      Socket to set\n\n \\return         0 if successful, or a non-zero error code"]
+    #[doc = " \\brief          Set the socket blocking\n\n \\param ctx      Socket to set\n\n \
+             \\return         0 if successful, or a non-zero error code"]
     pub fn mbedtls_net_set_block(ctx: *mut mbedtls_net_context) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the socket non-blocking\n\n \\param ctx      Socket to set\n\n \\return         0 if successful, or a non-zero error code"]
+    #[doc = " \\brief          Set the socket non-blocking\n\n \\param ctx      Socket to set\n\n \
+             \\return         0 if successful, or a non-zero error code"]
     pub fn mbedtls_net_set_nonblock(ctx: *mut mbedtls_net_context) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
@@ -7324,7 +7941,11 @@ unsafe extern "C" {
     pub fn mbedtls_net_close(ctx: *mut mbedtls_net_context);
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Gracefully shutdown the connection and free associated data\n\n \\param ctx      The context to free\n\n \\note           This function frees and clears data associated with the\n                 context but does not free the memory pointed to by \\p ctx.\n                 This memory is the responsibility of the caller."]
+    #[doc = " \\brief          Gracefully shutdown the connection and free associated data\n\n \
+             \\param ctx      The context to free\n\n \\note           This function frees and \
+             clears data associated with the\n                 context but does not free the \
+             memory pointed to by \\p ctx.\n                 This memory is the responsibility of \
+             the caller."]
     pub fn mbedtls_net_free(ctx: *mut mbedtls_net_context);
 }
 #[doc = " \\brief   This structure is used for storing cache entries"]
@@ -7372,7 +7993,8 @@ impl Default for mbedtls_ssl_cache_context {
     }
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Initialize an SSL cache context\n\n \\param cache    SSL cache context"]
+    #[doc = " \\brief          Initialize an SSL cache context\n\n \\param cache    SSL cache \
+             context"]
     pub fn mbedtls_ssl_cache_init(cache: *mut mbedtls_ssl_cache_context);
 }
 unsafe extern "C" {
@@ -7394,7 +8016,14 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Remove the cache entry by the session ID\n                 (Thread-safe if MBEDTLS_THREADING_C is enabled)\n\n \\param data            The SSL cache context to use.\n \\param session_id      The pointer to the buffer holding the session ID\n                        associated to session.\n \\param session_id_len  The length of \\p session_id in bytes.\n\n \\return                \\c 0 on success. This indicates the cache entry for\n                        the session with provided ID is removed or does not\n                        exist.\n \\return                A negative error code on failure."]
+    #[doc = " \\brief          Remove the cache entry by the session ID\n                 \
+             (Thread-safe if MBEDTLS_THREADING_C is enabled)\n\n \\param data            The SSL \
+             cache context to use.\n \\param session_id      The pointer to the buffer holding the \
+             session ID\n                        associated to session.\n \\param session_id_len  \
+             The length of \\p session_id in bytes.\n\n \\return                \\c 0 on success. \
+             This indicates the cache entry for\n                        the session with provided \
+             ID is removed or does not\n                        exist.\n \\return                A \
+             negative error code on failure."]
     pub fn mbedtls_ssl_cache_remove(
         data: *mut ::std::os::raw::c_void,
         session_id: *const ::std::os::raw::c_uchar,
@@ -7402,21 +8031,27 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the cache timeout\n                 (Default: MBEDTLS_SSL_CACHE_DEFAULT_TIMEOUT (1 day))\n\n                 A timeout of 0 indicates no timeout.\n\n \\param cache    SSL cache context\n \\param timeout  cache entry timeout in seconds"]
+    #[doc = " \\brief          Set the cache timeout\n                 (Default: \
+             MBEDTLS_SSL_CACHE_DEFAULT_TIMEOUT (1 day))\n\n                 A timeout of 0 \
+             indicates no timeout.\n\n \\param cache    SSL cache context\n \\param timeout  cache \
+             entry timeout in seconds"]
     pub fn mbedtls_ssl_cache_set_timeout(
         cache: *mut mbedtls_ssl_cache_context,
         timeout: ::std::os::raw::c_int,
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set the maximum number of cache entries\n                 (Default: MBEDTLS_SSL_CACHE_DEFAULT_MAX_ENTRIES (50))\n\n \\param cache    SSL cache context\n \\param max      cache entry maximum"]
+    #[doc = " \\brief          Set the maximum number of cache entries\n                 (Default: \
+             MBEDTLS_SSL_CACHE_DEFAULT_MAX_ENTRIES (50))\n\n \\param cache    SSL cache context\n \
+             \\param max      cache entry maximum"]
     pub fn mbedtls_ssl_cache_set_max_entries(
         cache: *mut mbedtls_ssl_cache_context,
         max: ::std::os::raw::c_int,
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Free referenced items in a cache context and clear memory\n\n \\param cache    SSL cache context"]
+    #[doc = " \\brief          Free referenced items in a cache context and clear memory\n\n \
+             \\param cache    SSL cache context"]
     pub fn mbedtls_ssl_cache_free(cache: *mut mbedtls_ssl_cache_context);
 }
 #[doc = " \\brief          Context for the default cookie functions."]
@@ -7439,7 +8074,10 @@ unsafe extern "C" {
     pub fn mbedtls_ssl_cookie_setup(ctx: *mut mbedtls_ssl_cookie_ctx) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Set expiration delay for cookies\n                 (Default MBEDTLS_SSL_COOKIE_TIMEOUT)\n\n \\param ctx      Cookie context\n \\param delay    Delay, in seconds if HAVE_TIME, or in number of cookies\n                 issued in the meantime.\n                 0 to disable expiration (NOT recommended)"]
+    #[doc = " \\brief          Set expiration delay for cookies\n                 (Default \
+             MBEDTLS_SSL_COOKIE_TIMEOUT)\n\n \\param ctx      Cookie context\n \\param delay    \
+             Delay, in seconds if HAVE_TIME, or in number of cookies\n                 issued in \
+             the meantime.\n                 0 to disable expiration (NOT recommended)"]
     pub fn mbedtls_ssl_cookie_set_timeout(
         ctx: *mut mbedtls_ssl_cookie_ctx,
         delay: ::std::os::raw::c_ulong,
@@ -7476,7 +8114,8 @@ pub struct mbedtls_ssl_ticket_key {
     pub private_name: [::std::os::raw::c_uchar; 4usize],
     #[doc = "< key generation timestamp (seconds)"]
     pub private_generation_time: mbedtls_time_t,
-    #[doc = " Lifetime of the key in seconds. This is also the lifetime of the\n  tickets created under that key."]
+    #[doc = " Lifetime of the key in seconds. This is also the lifetime of the\n  tickets created \
+             under that key."]
     pub private_lifetime: u32,
     #[doc = "< key used for auth enc/decryption"]
     pub private_key: mbedtls_svc_key_id_t,
@@ -7499,7 +8138,9 @@ pub struct mbedtls_ssl_ticket_context {
     pub private_ticket_lifetime: u32,
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Initialize a ticket context.\n                  (Just make it ready for mbedtls_ssl_ticket_setup()\n                  or mbedtls_ssl_ticket_free().)\n\n \\param ctx       Context to be initialized"]
+    #[doc = " \\brief           Initialize a ticket context.\n                  (Just make it \
+             ready for mbedtls_ssl_ticket_setup()\n                  or \
+             mbedtls_ssl_ticket_free().)\n\n \\param ctx       Context to be initialized"]
     pub fn mbedtls_ssl_ticket_init(ctx: *mut mbedtls_ssl_ticket_context);
 }
 unsafe extern "C" {
@@ -7524,7 +8165,8 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Implementation of the ticket write callback\n\n \\note            See \\c mbedtls_ssl_ticket_write_t for description"]
+    #[doc = " \\brief           Implementation of the ticket write callback\n\n \\note            \
+             See \\c mbedtls_ssl_ticket_write_t for description"]
     pub fn mbedtls_ssl_ticket_write(
         p_ticket: *mut ::std::os::raw::c_void,
         session: *const mbedtls_ssl_session,
@@ -7535,7 +8177,8 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Implementation of the ticket parse callback\n\n \\note            See \\c mbedtls_ssl_ticket_parse_t for description"]
+    #[doc = " \\brief           Implementation of the ticket parse callback\n\n \\note            \
+             See \\c mbedtls_ssl_ticket_parse_t for description"]
     pub fn mbedtls_ssl_ticket_parse(
         p_ticket: *mut ::std::os::raw::c_void,
         session: *mut mbedtls_ssl_session,
@@ -7544,7 +8187,8 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Free a context's content and zeroize it.\n\n \\param ctx       Context to be cleaned up"]
+    #[doc = " \\brief           Free a context's content and zeroize it.\n\n \\param ctx       \
+             Context to be cleaned up"]
     pub fn mbedtls_ssl_ticket_free(ctx: *mut mbedtls_ssl_ticket_context);
 }
 #[doc = " \\brief          timer structure"]
@@ -7576,11 +8220,14 @@ unsafe extern "C" {
     pub fn mbedtls_timing_get_delay(data: *mut ::std::os::raw::c_void) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Get the final timing delay\n\n \\param data     Pointer to timing data\n                 Must point to a valid \\c mbedtls_timing_delay_context struct.\n\n \\return         Final timing delay in milliseconds."]
+    #[doc = " \\brief          Get the final timing delay\n\n \\param data     Pointer to timing \
+             data\n                 Must point to a valid \\c mbedtls_timing_delay_context \
+             struct.\n\n \\return         Final timing delay in milliseconds."]
     pub fn mbedtls_timing_get_final_delay(data: *const mbedtls_timing_delay_context) -> u32;
 }
 unsafe extern "C" {
-    #[doc = " Get the version number.\n\n \\return          The constructed version number in the format\n                  MMNNPP00 (Major, Minor, Patch)."]
+    #[doc = " Get the version number.\n\n \\return          The constructed version number in the \
+             format\n                  MMNNPP00 (Major, Minor, Patch)."]
     pub fn mbedtls_version_get_number() -> ::std::os::raw::c_uint;
 }
 unsafe extern "C" {
@@ -7597,7 +8244,9 @@ unsafe extern "C" {
         feature: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int;
 }
-#[doc = " Certificate Signing Request (CSR) structure.\n\n Some fields of this structure are publicly readable. Do not modify\n them except via Mbed TLS library functions: the effect of modifying\n those fields or the data that those fields point to is unspecified."]
+#[doc = " Certificate Signing Request (CSR) structure.\n\n Some fields of this structure are \
+         publicly readable. Do not modify\n them except via Mbed TLS library functions: the effect \
+         of modifying\n those fields or the data that those fields point to is unspecified."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mbedtls_x509_csr {
@@ -7617,15 +8266,18 @@ pub struct mbedtls_x509_csr {
     pub key_usage: ::std::os::raw::c_uint,
     #[doc = "< Optional Netscape certificate type extension value: See the values in x509.h"]
     pub ns_cert_type: ::std::os::raw::c_uchar,
-    #[doc = "< Optional list of raw entries of Subject Alternative Names extension. These can be later parsed by mbedtls_x509_parse_subject_alt_name."]
+    #[doc = "< Optional list of raw entries of Subject Alternative Names extension. These can be \
+             later parsed by mbedtls_x509_parse_subject_alt_name."]
     pub subject_alt_names: mbedtls_x509_sequence,
     #[doc = "< Bit string containing detected and parsed extensions"]
     pub private_ext_types: ::std::os::raw::c_int,
     pub sig_oid: mbedtls_x509_buf,
     pub private_sig: mbedtls_x509_buf,
-    #[doc = "< Internal representation of the MD algorithm of the signature algorithm, e.g. MBEDTLS_MD_SHA256"]
+    #[doc = "< Internal representation of the MD algorithm of the signature algorithm, e.g. \
+             MBEDTLS_MD_SHA256"]
     pub private_sig_md: mbedtls_md_type_t,
-    #[doc = "< Internal representation of the Public Key algorithm of the signature algorithm, e.g. MBEDTLS_PK_RSA"]
+    #[doc = "< Internal representation of the Public Key algorithm of the signature algorithm, \
+             e.g. MBEDTLS_PK_RSA"]
     pub private_sig_pk: mbedtls_pk_sigalg_t,
 }
 impl Default for mbedtls_x509_csr {
@@ -7685,7 +8337,13 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Load a Certificate Signing Request (CSR), DER or PEM format\n\n \\note           See notes for \\c mbedtls_x509_csr_parse_der()\n\n \\note           The PSA crypto subsystem must have been initialized by\n                 calling psa_crypto_init() before calling this function.\n\n \\param csr      CSR context to fill\n \\param buf      buffer holding the CRL data\n \\param buflen   size of the buffer\n                 (including the terminating null byte for PEM data)\n\n \\return         0 if successful, or a specific X509 or PEM error code"]
+    #[doc = " \\brief          Load a Certificate Signing Request (CSR), DER or PEM format\n\n \
+             \\note           See notes for \\c mbedtls_x509_csr_parse_der()\n\n \\note           \
+             The PSA crypto subsystem must have been initialized by\n                 calling \
+             psa_crypto_init() before calling this function.\n\n \\param csr      CSR context to \
+             fill\n \\param buf      buffer holding the CRL data\n \\param buflen   size of the \
+             buffer\n                 (including the terminating null byte for PEM data)\n\n \
+             \\return         0 if successful, or a specific X509 or PEM error code"]
     pub fn mbedtls_x509_csr_parse(
         csr: *mut mbedtls_x509_csr,
         buf: *const ::std::os::raw::c_uchar,
@@ -7693,7 +8351,10 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief          Load a Certificate Signing Request (CSR)\n\n \\note           See notes for \\c mbedtls_x509_csr_parse()\n\n \\param csr      CSR context to fill\n \\param path     filename to read the CSR from\n\n \\return         0 if successful, or a specific X509 or PEM error code"]
+    #[doc = " \\brief          Load a Certificate Signing Request (CSR)\n\n \\note           See \
+             notes for \\c mbedtls_x509_csr_parse()\n\n \\param csr      CSR context to fill\n \
+             \\param path     filename to read the CSR from\n\n \\return         0 if successful, \
+             or a specific X509 or PEM error code"]
     pub fn mbedtls_x509_csr_parse_file(
         csr: *mut mbedtls_x509_csr,
         path: *const ::std::os::raw::c_char,
@@ -7717,7 +8378,8 @@ unsafe extern "C" {
     pub fn mbedtls_x509_csr_free(csr: *mut mbedtls_x509_csr);
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Initialize a CSR context\n\n \\param ctx       CSR context to initialize"]
+    #[doc = " \\brief           Initialize a CSR context\n\n \\param ctx       CSR context to \
+             initialize"]
     pub fn mbedtls_x509write_csr_init(ctx: *mut mbedtls_x509write_csr);
 }
 unsafe extern "C" {
@@ -7735,7 +8397,9 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the MD algorithm to use for the signature\n                  (e.g. MBEDTLS_MD_SHA1)\n\n \\param ctx       CSR context to use\n \\param md_alg    MD algorithm to use"]
+    #[doc = " \\brief           Set the MD algorithm to use for the signature\n                  \
+             (e.g. MBEDTLS_MD_SHA1)\n\n \\param ctx       CSR context to use\n \\param md_alg    \
+             MD algorithm to use"]
     pub fn mbedtls_x509write_csr_set_md_alg(
         ctx: *mut mbedtls_x509write_csr,
         md_alg: mbedtls_md_type_t,
@@ -7749,14 +8413,21 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set Subject Alternative Name\n\n \\param ctx       CSR context to use\n \\param san_list  List of SAN values\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY\n\n \\note            Only \"dnsName\", \"uniformResourceIdentifier\" and \"otherName\",\n                  as defined in RFC 5280, are supported."]
+    #[doc = " \\brief           Set Subject Alternative Name\n\n \\param ctx       CSR context to \
+             use\n \\param san_list  List of SAN values\n\n \\return          0 if successful, or \
+             #PSA_ERROR_INSUFFICIENT_MEMORY\n\n \\note            Only \"dnsName\", \
+             \"uniformResourceIdentifier\" and \"otherName\",\n                  as defined in RFC \
+             5280, are supported."]
     pub fn mbedtls_x509write_csr_set_subject_alternative_name(
         ctx: *mut mbedtls_x509write_csr,
         san_list: *const mbedtls_x509_san_list,
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Set the Netscape Cert Type flags\n                  (e.g. MBEDTLS_X509_NS_CERT_TYPE_SSL_CLIENT | MBEDTLS_X509_NS_CERT_TYPE_EMAIL)\n\n \\param ctx           CSR context to use\n \\param ns_cert_type  Netscape Cert Type flags to set\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY"]
+    #[doc = " \\brief           Set the Netscape Cert Type flags\n                  (e.g. \
+             MBEDTLS_X509_NS_CERT_TYPE_SSL_CLIENT | MBEDTLS_X509_NS_CERT_TYPE_EMAIL)\n\n \\param \
+             ctx           CSR context to use\n \\param ns_cert_type  Netscape Cert Type flags to \
+             set\n\n \\return          0 if successful, or #PSA_ERROR_INSUFFICIENT_MEMORY"]
     pub fn mbedtls_x509write_csr_set_ns_cert_type(
         ctx: *mut mbedtls_x509write_csr,
         ns_cert_type: ::std::os::raw::c_uchar,
@@ -7774,7 +8445,8 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Free the contents of a CSR context\n\n \\param ctx       CSR context to free"]
+    #[doc = " \\brief           Free the contents of a CSR context\n\n \\param ctx       CSR \
+             context to free"]
     pub fn mbedtls_x509write_csr_free(ctx: *mut mbedtls_x509write_csr);
 }
 unsafe extern "C" {
@@ -7786,7 +8458,10 @@ unsafe extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 unsafe extern "C" {
-    #[doc = " \\brief           Write a CSR (Certificate Signing Request) to a\n                  PEM string\n\n \\param ctx       CSR to write away\n \\param buf       buffer to write to\n \\param size      size of the buffer\n\n \\return          0 if successful, or a specific error code\n"]
+    #[doc = " \\brief           Write a CSR (Certificate Signing Request) to a\n                  \
+             PEM string\n\n \\param ctx       CSR to write away\n \\param buf       buffer to \
+             write to\n \\param size      size of the buffer\n\n \\return          0 if \
+             successful, or a specific error code\n"]
     pub fn mbedtls_x509write_csr_pem(
         ctx: *mut mbedtls_x509write_csr,
         buf: *mut ::std::os::raw::c_uchar,
