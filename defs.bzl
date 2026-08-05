@@ -11,9 +11,10 @@
 
 """Consumer-instantiated mbedtls-rs targets."""
 
+load("@mbedtls_crates//:defs.bzl", "crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
-def mbedtls_rs_library(name, deps, aliases = {}, visibility = None):
+def mbedtls_rs_library(name, tokio, tracing, aliases = {}, visibility = None):
     """Instantiates mbedtls-rs with the consumer's Rust dependency universe."""
     rust_library(
         name = name,
@@ -24,5 +25,12 @@ def mbedtls_rs_library(name, deps, aliases = {}, visibility = None):
         edition = "2024",
         rustc_flags = ["--cfg=feature=\"tokio\""],
         visibility = visibility,
-        deps = [Label("//mbedtls-sys:mbedtls_sys")] + deps,
+        deps = [
+            Label("//mbedtls-sys:mbedtls_sys"),
+            tokio,
+            tracing,
+        ] + crate_deps(
+            ["ed25519-dalek"],
+            package_name = "mbedtls-rs",
+        ),
     )
