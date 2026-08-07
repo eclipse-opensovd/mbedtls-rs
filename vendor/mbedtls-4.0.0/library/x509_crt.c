@@ -71,7 +71,7 @@
 #endif
 
 #if defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
-#include "ed25519_extract.h"
+#include "mbedtls/ed25519_extract.h"
 #endif
 
 /*

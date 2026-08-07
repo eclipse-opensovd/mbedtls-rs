@@ -19,14 +19,27 @@ These patches extends mbedtls 4.0.0 with two features absent from upstream:
 - **Ed25519 (PureEdDSA) support across the PSA, PK, X.509, and TLS 1.2 layers**
 
 The patch order is `record-size-limit-tls12.patch`, `ed25519-psa-driver.patch`,
-and then `cmake-build-dir-generated-files.patch`.
+`embed-ed25519-extract-header.patch`, `cmake-build-dir-generated-files.patch`,
+and then `preserve-toolchain-archiver.patch`.
+
+The extraction-header patch places the Ed25519 SPKI helper in Mbed TLS's
+normal include tree. This lets Cargo, root Bazel builds, and external-module
+Bazel builds use the same toolchain-provided include paths.
 
 ## CMake build-directory outputs
 
 The upstream TF-PSA CMake configuration writes generated Doxygen inputs into
-the source tree during every configure step. The third patch redirects those
+the source tree during every configure step. The fourth patch redirects those
 files into the CMake build directory, keeping Cargo and Bazel builds
 source-clean.
+
+## Bazel C/C++ toolchain archiver
+
+Mbed TLS replaces CMake's static archive commands when AppleClang is detected.
+That override assumes GNU `ar` syntax and breaks when Bazel selects Apple's
+`libtool` as the static linker. The fifth patch adds an opt-in guard so Bazel
+builds preserve archive commands generated from the selected C/C++ toolchain.
+Cargo builds retain the upstream behavior.
 
 ## `record_size_limit` (RFC 8449) for TLS 1.2
 

@@ -87,8 +87,6 @@ fn main() {
         .cflag("-DMBEDTLS_SSL_NULL_CIPHERSUITES")
         // Enable our Ed25519 PSA accelerator driver.
         .cflag("-DMBEDTLS_ED25519_PSA_DRIVER")
-        // Include path for ed25519_extract.h used by ed25519_psa_driver.c
-        .cflag(format!("-I{}", manifest_dir.join("csrc").display()))
         .build();
 
     // Link search paths emitted by cmake

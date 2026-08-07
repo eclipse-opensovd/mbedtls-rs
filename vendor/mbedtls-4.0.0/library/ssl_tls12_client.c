@@ -44,7 +44,7 @@ static int local_err_translation(psa_status_t status)
 #endif
 
 #if defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
-#include "ed25519_extract.h"
+#include "mbedtls/ed25519_extract.h"
 #endif
 
 #if defined(MBEDTLS_SSL_RENEGOTIATION)

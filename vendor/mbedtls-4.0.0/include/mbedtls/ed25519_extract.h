@@ -31,12 +31,12 @@
  * \brief  Extract a raw 32-byte Ed25519 public key.
  *
  * If \p pub_raw_len is 32 the input is taken as-is.  Otherwise it is
- * parsed as a DER-encoded SubjectPublicKeyInfo (RFC 8410 §4):
+ * parsed as a DER-encoded SubjectPublicKeyInfo (RFC 8410 section 4):
  *
  *   SEQUENCE {                           - SubjectPublicKeyInfo
  *     SEQUENCE {                         - AlgorithmIdentifier
  *       OID 1.3.101.112                  -   id-Ed25519
- *       -- parameters MUST be absent (RFC 8410 §3)
+ *       -- parameters MUST be absent (RFC 8410 section 3)
  *     }
  *     BIT STRING (0 unused bits)         - 32-byte raw public key
  *   }
@@ -56,16 +56,17 @@ static inline int ed25519_extract_raw_pubkey(
     unsigned char *pub_raw, const size_t pub_raw_len,
     unsigned char out[ED25519_RAW_PUBKEY_LEN])
 {
-    /* ---- input is already a bare 32-byte key. ---- */
+    /* Input is already a bare 32-byte key. */
     if (pub_raw_len == ED25519_RAW_PUBKEY_LEN) {
         memcpy(out, pub_raw, ED25519_RAW_PUBKEY_LEN);
         return 0;
     }
 
-    /* ---- parse SubjectPublicKeyInfo from DER. ----
+    /*
+     * Parse SubjectPublicKeyInfo from DER.
      *
-     * Cast away const: the mbedtls ASN.1 helpers advance the read pointer
-     * through the buffer but never modify the underlying data.
+     * The mbedtls ASN.1 helpers advance the read pointer through the buffer
+     * but never modify the underlying data.
      */
     unsigned char *p   = pub_raw;
     unsigned char *end = p + pub_raw_len;
@@ -112,9 +113,8 @@ static inline int ed25519_extract_raw_pubkey(
     p += oid_len;
 
     /*
-     * Step 4 - RFC 8410 §3: "For all of the OIDs, the parameters
-     * MUST be absent."  Reject if anything follows the OID inside
-     * the AlgorithmIdentifier SEQUENCE.
+     * Step 4 - RFC 8410 section 3 requires absent parameters. Reject if
+     * anything follows the OID inside the AlgorithmIdentifier SEQUENCE.
      */
     if (p != alg_end) {
         return MBEDTLS_ERR_PK_INVALID_PUBKEY;
@@ -122,21 +122,15 @@ static inline int ed25519_extract_raw_pubkey(
 
     /*
      * Step 5 - BIT STRING containing the raw public key.
-     * mbedtls_asn1_get_bitstring_null() parses the tag and length,
-     * and verifies the "unused bits" octet is 0x00 (required for
-     * Ed25519 since the key is an integral number of bytes).
-     * After the call, `p` points to the first key byte.
+     * mbedtls_asn1_get_bitstring_null() verifies zero unused bits and leaves
+     * `p` pointing to the first key byte.
      */
     ret = mbedtls_asn1_get_bitstring_null(&p, end, &len);
     if (ret != 0 || len != ED25519_RAW_PUBKEY_LEN) {
         return MBEDTLS_ERR_PK_INVALID_PUBKEY;
     }
 
-    /*
-     * Step 6 - Verify there is no trailing data after the BIT STRING
-     * content.  (The outer SEQUENCE check in step 1 already bounds the
-     * total size, but being explicit here catches internal parse bugs.)
-     */
+    /* Step 6 - Reject trailing data after the BIT STRING content. */
     if (p + len != end) {
         return MBEDTLS_ERR_PK_INVALID_PUBKEY;
     }

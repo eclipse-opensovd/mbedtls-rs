@@ -116,13 +116,17 @@ Add as a git dependency:
 mbedtls-rs = { git = "https://github.com/eclipse-opensovd/mbedtls-rs", rev = "GIT_REV" }
 ```
 
-For local development, add a `[patch]` override in the downstream
-workspace's `.cargo/config.toml`:
+For local development, add a `[patch]` override in the downstream workspace's
+root `Cargo.toml`:
 
 ```toml
 [patch."https://github.com/eclipse-opensovd/mbedtls-rs"]
 mbedtls-sys = { path = "../mbedtls-rs/mbedtls-sys" }
 mbedtls-rs  = { path = "../mbedtls-rs/mbedtls-rs" }
 ```
+
+Cargo reads `[patch]` sections from manifests. The patch replaces crates
+resolved from the matching git source while preserving the git dependency in
+the downstream package manifest.
 
 License: Apache-2.0

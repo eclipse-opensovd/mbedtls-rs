@@ -15,16 +15,14 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 
 cmake(
     name = "mbedtls_native",
-    build_data = [
-        "csrc/ed25519_extract.h",
-        "csrc/ed25519_psa_driver.h",
-    ],
+    build_data = ["csrc/ed25519_psa_driver.h"],
     cache_entries = {
-        "CMAKE_C_FLAGS": "-DMBEDTLS_SSL_RECORD_SIZE_LIMIT -DMBEDTLS_SSL_NULL_CIPHERSUITES -DMBEDTLS_ED25519_PSA_DRIVER -I$$EXT_BUILD_ROOT$$/mbedtls-sys/csrc",
+        "CMAKE_C_FLAGS": "-DMBEDTLS_SSL_RECORD_SIZE_LIMIT -DMBEDTLS_SSL_NULL_CIPHERSUITES -DMBEDTLS_ED25519_PSA_DRIVER",
         "ENABLE_PROGRAMS": "OFF",
         "ENABLE_TESTING": "OFF",
         "GEN_FILES": "OFF",
         "MBEDTLS_FATAL_WARNINGS": "OFF",
+        "MBEDTLS_PRESERVE_TOOLCHAIN_ARCHIVER": "ON",
         "USE_SHARED_MBEDTLS_LIBRARY": "OFF",
         "USE_STATIC_MBEDTLS_LIBRARY": "ON",
     },
@@ -40,7 +38,6 @@ cc_library(
     name = "ed25519_psa_driver",
     srcs = ["csrc/ed25519_psa_driver.c"],
     hdrs = [
-        "csrc/ed25519_extract.h",
         "csrc/ed25519_psa_driver.h",
     ],
     copts = ["-DMBEDTLS_ED25519_PSA_DRIVER"],
