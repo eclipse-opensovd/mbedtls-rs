@@ -13,7 +13,11 @@ SPDX-License-Identifier: Apache-2.0
 
 # Notices for Eclipse OpenSOVD mbedtls-rs
 
-This content is produced and maintained by the Eclipse OpenSOVD project.
+The Mbed TLS source is forked from the [Mbed TLS upstream](https://github.com/Mbed-TLS/mbedtls)
+and modified to fit the requirements of the OpenSOVD project. Eclipse OpenSOVD
+does not claim ownership of any of the original Mbed TLS source in this
+repository. All other content is produced and maintained by the Eclipse
+OpenSOVD project.
 
 - [Project home](https://projects.eclipse.org/projects/automotive.opensovd)
 
