@@ -92,8 +92,7 @@ pub struct SslConfig {
     inner: ffi::mbedtls_ssl_config,
     // Prevent the owned objects from being dropped while the config references them.
     _ca_chain: Option<Box<X509Certificate>>,
-    _own_cert: Option<Box<X509Certificate>>,
-    _own_key: Option<Box<PrivateKey>>,
+    _own_certs: Vec<(Box<X509Certificate>, Box<PrivateKey>)>,
     _alpn_cstrings: Option<Vec<CString>>,
     _alpn_ptrs: Option<Vec<*const std::os::raw::c_char>>,
     _ciphersuites: Option<Vec<i32>>,
@@ -110,8 +109,7 @@ unsafe impl Sync for SslConfig {}
 pub struct SslConfigBuilder {
     inner: ffi::mbedtls_ssl_config,
     ca_chain: Option<Box<X509Certificate>>,
-    own_cert: Option<Box<X509Certificate>>,
-    own_key: Option<Box<PrivateKey>>,
+    own_certs: Vec<(Box<X509Certificate>, Box<PrivateKey>)>,
     alpn_cstrings: Option<Vec<CString>>,
     alpn_ptrs: Option<Vec<*const std::os::raw::c_char>>,
     ciphersuites: Option<Vec<i32>>,
@@ -170,8 +168,7 @@ impl SslConfigBuilder {
             Ok(Self {
                 inner: conf,
                 ca_chain: None,
-                own_cert: None,
-                own_key: None,
+                own_certs: Vec::new(),
                 alpn_cstrings: None,
                 alpn_ptrs: None,
                 ciphersuites: None,
@@ -184,9 +181,8 @@ impl SslConfigBuilder {
 
     /// Set the trusted CA chain for peer-certificate verification.
     ///
-    /// # Errors
-    /// * `MbedtlsError` with the error code if the underlying mbedtls function
-    ///   returns an error.
+    /// Note: certificate revocation lists (CRLs) are not currently
+    /// supported; the CRL argument is always empty.
     #[must_use]
     pub fn ca_chain(mut self, ca: X509Certificate) -> Self {
         let mut ca = Box::new(ca);
@@ -203,6 +199,10 @@ impl SslConfigBuilder {
 
     /// Set the server's own certificate and private key.
     ///
+    /// May be called multiple times: mbedtls appends each cert/key pair to an
+    /// internal list and picks a suitable one during the handshake. All pairs
+    /// are kept alive for the lifetime of the built [`SslConfig`].
+    ///
     /// # Errors
     /// * `MbedtlsError` with the error code if the underlying mbedtls function
     ///   returns an error.
@@ -213,8 +213,7 @@ impl SslConfigBuilder {
             ffi::mbedtls_ssl_conf_own_cert(&raw mut self.inner, cert.as_mut_ptr(), key.as_mut_ptr())
         };
         result_from_raw(ret)?;
-        self.own_cert = Some(cert);
-        self.own_key = Some(key);
+        self.own_certs.push((cert, key));
         Ok(self)
     }
 
@@ -256,10 +255,6 @@ impl SslConfigBuilder {
     ///     ffi::MBEDTLS_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 as i32,
     /// ])
     /// ```
-    ///
-    /// # Errors
-    /// * `MbedtlsError` with the error code if the underlying mbedtls function
-    ///   returns an error.
     #[must_use]
     pub fn ciphersuites(mut self, ciphersuites: &[i32]) -> Self {
         let mut cs: Vec<i32> = ciphersuites.to_vec();
@@ -285,10 +280,6 @@ impl SslConfigBuilder {
     ///     ffi::MBEDTLS_SSL_IANA_TLS_GROUP_SECP384R1 as u16,
     /// ])
     /// ```
-    ///
-    /// # Errors
-    /// * `MbedtlsError` with the error code if the underlying mbedtls function
-    ///   returns an error.
     #[must_use]
     pub fn groups(mut self, groups: &[u16]) -> Self {
         let mut g: Vec<u16> = groups.to_vec();
@@ -305,10 +296,6 @@ impl SslConfigBuilder {
     /// Pass IANA `SignatureScheme` identifiers. For TLS 1.3, use
     /// `ffi::MBEDTLS_TLS1_3_SIG_*` constants. The list must be ordered by
     /// preference.
-    ///
-    /// # Errors
-    /// * `MbedtlsError` with the error code if the underlying mbedtls function
-    ///   returns an error.
     #[must_use]
     pub fn sig_algs(mut self, sig_algs: &[u16]) -> Self {
         let mut sa: Vec<u16> = sig_algs.to_vec();
@@ -374,8 +361,7 @@ impl SslConfigBuilder {
         Arc::new(SslConfig {
             inner: std::mem::take(&mut self.inner),
             _ca_chain: std::mem::take(&mut self.ca_chain),
-            _own_cert: std::mem::take(&mut self.own_cert),
-            _own_key: std::mem::take(&mut self.own_key),
+            _own_certs: std::mem::take(&mut self.own_certs),
             _alpn_cstrings: std::mem::take(&mut self.alpn_cstrings),
             _alpn_ptrs: std::mem::take(&mut self.alpn_ptrs),
             _ciphersuites: std::mem::take(&mut self.ciphersuites),

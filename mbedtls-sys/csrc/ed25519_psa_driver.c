@@ -64,19 +64,23 @@ psa_status_t ed25519_psa_verify_message(
     size_t input_length, const uint8_t *signature, size_t signature_length) {
   psa_key_type_t type = psa_get_key_type(attributes);
 
-  /* Only handle PureEdDSA on Twisted-Edwards keys. */
+  /* Only handle PureEdDSA on Twisted-Edwards *public* keys. Key pairs are
+   * rejected: the PSA key buffer for an ECC key pair holds the private
+   * seed, not the public key, so verifying with it directly would use the
+   * wrong bytes. The PSA core falls back to another implementation. */
   if (alg != PSA_ALG_PURE_EDDSA) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
-  if (type != PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_TWISTED_EDWARDS) &&
-      type != PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_TWISTED_EDWARDS)) {
+  if (type != PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_TWISTED_EDWARDS)) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
   if (signature_length != ED25519_SIG_SIZE) {
     return PSA_ERROR_INVALID_SIGNATURE;
   }
-  if (key_buffer_size < ED25519_PUB_KEY_SIZE) {
+  /* Imported public keys are stored as exactly 32 bytes (see
+   * ed25519_psa_import_key); anything else is a corrupt key object. */
+  if (key_buffer_size != ED25519_PUB_KEY_SIZE) {
     return PSA_ERROR_CORRUPTION_DETECTED;
   }
 

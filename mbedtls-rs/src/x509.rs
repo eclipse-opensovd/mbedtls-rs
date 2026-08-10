@@ -41,12 +41,7 @@ impl X509Certificate {
     /// * `MbedtlsError` with the error code if the underlying mbedtls function
     ///   returns an error, such as if the input is invalid.
     pub fn from_pem(pem: &[u8]) -> Result<Self, MbedtlsError> {
-        // mbedtls_x509_crt_parse expects the terminating NUL for PEM
-        if pem.last().is_none_or(|v| *v != 0) {
-            return Err(MbedtlsError::from_raw(
-                mbedtls_sys::MBEDTLS_ERR_SSL_BAD_CONFIG,
-            ));
-        }
+        check_pem_nul(pem, mbedtls_sys::MBEDTLS_ERR_X509_INVALID_FORMAT)?;
         let mut crt = Self::new_uninit();
         let ret =
             unsafe { ffi::mbedtls_x509_crt_parse(&raw mut crt.inner, pem.as_ptr(), pem.len()) };
@@ -86,12 +81,16 @@ impl X509Certificate {
         Ok(crt)
     }
 
-    /// Append more certificates (PEM or DER) to this chain.
+    /// Append more PEM-encoded certificates to this chain.
+    ///
+    /// The buffer must include the trailing NUL byte in its length
+    /// (same requirement as [`Self::from_pem`]).
     ///
     /// # Errors
     /// * `MbedtlsError` with the error code if the underlying mbedtls function
     ///   returns an error, such as if the input is invalid.
     pub fn append_pem(&mut self, pem: &[u8]) -> Result<(), MbedtlsError> {
+        check_pem_nul(pem, mbedtls_sys::MBEDTLS_ERR_X509_INVALID_FORMAT)?;
         let ret =
             unsafe { ffi::mbedtls_x509_crt_parse(&raw mut self.inner, pem.as_ptr(), pem.len()) };
         result_from_raw(ret)?;
@@ -146,6 +145,7 @@ impl PrivateKey {
     /// * `MbedtlsError` with the error code if the underlying mbedtls function
     ///   returns an error, such as if the key is invalid or the password is incorrect.
     pub fn from_pem(pem: &[u8], password: &[u8]) -> Result<Self, MbedtlsError> {
+        check_pem_nul(pem, mbedtls_sys::MBEDTLS_ERR_PK_KEY_INVALID_FORMAT)?;
         let mut pk = Self::new_uninit();
         let pwd_ptr = if password.is_empty() {
             ptr::null()
@@ -205,11 +205,24 @@ impl PrivateKey {
         &raw mut self.inner
     }
 
-    /// Key size in bits.
+    /// Key size in bits, or `None` if it cannot be determined
+    /// (`mbedtls_pk_get_bitlen` returns 0 for invalid/uninitialized keys).
     #[must_use]
-    pub fn bit_len(&self) -> usize {
-        unsafe { ffi::mbedtls_pk_get_bitlen(&raw const self.inner) }
+    pub fn bit_len(&self) -> Option<usize> {
+        match unsafe { ffi::mbedtls_pk_get_bitlen(&raw const self.inner) } {
+            0 => None,
+            n => Some(n),
+        }
     }
+}
+
+/// mbedtls PEM parsers require the buffer to be NUL-terminated and the
+/// length to include that terminator; reject anything else up front.
+fn check_pem_nul(pem: &[u8], err_code: i32) -> Result<(), MbedtlsError> {
+    if pem.last().is_none_or(|v| *v != 0) {
+        return Err(MbedtlsError::from_raw(err_code));
+    }
+    Ok(())
 }
 
 impl Drop for PrivateKey {

@@ -50,6 +50,9 @@ unsafe extern "C" fn bio_send<S: Write>(
     let bio = unsafe { &mut *ctx.cast::<BioContext<S>>() };
     let slice = unsafe { std::slice::from_raw_parts(buf, len) };
     match bio.stream.write(slice) {
+        // A zero-byte write is treated as EOF: the peer (or a wrapper) will
+        // not accept any more data. Conflates rare "wrote 0 this call"
+        // implementations with true EOF, which is the conventional reading.
         Ok(0) => ffi::MBEDTLS_ERR_SSL_CONN_EOF as c_int,
         Ok(n) => c_int::try_from(n).unwrap_or(ffi::MBEDTLS_ERR_SSL_INTERNAL_ERROR as c_int),
         Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
@@ -67,6 +70,7 @@ unsafe extern "C" fn bio_recv<S: Read>(ctx: *mut c_void, buf: *mut c_uchar, len:
     let bio = unsafe { &mut *ctx.cast::<BioContext<S>>() };
     let slice = unsafe { std::slice::from_raw_parts_mut(buf, len) };
     match bio.stream.read(slice) {
+        // Zero-byte read means the peer closed the connection.
         Ok(0) => ffi::MBEDTLS_ERR_SSL_CONN_EOF as c_int,
         Ok(n) => c_int::try_from(n).unwrap_or(ffi::MBEDTLS_ERR_SSL_INTERNAL_ERROR as c_int),
         Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
@@ -104,6 +108,15 @@ impl<S: Read + Write> SslStream<S> {
     /// Begin a TLS **client** handshake over `stream`.
     ///
     /// If `hostname` is set `mbedtls_ssl_set_hostname` is called which enables SNI.
+    ///
+    /// # Security
+    ///
+    /// If `hostname` is `None`, SNI **and hostname verification are
+    /// disabled**: any certificate signed by a trusted CA is accepted
+    /// regardless of which host it was issued for, enabling
+    /// machine-in-the-middle attacks. Only pass `None` when the peer is
+    /// authenticated by other means (e.g. certificate pinning).
+    ///
     /// # Errors
     /// * `HandshakeError::Failure` if `psa_crypto_init` fails
     /// * `HandshakeError::Failure` if setting any mbedtls config parameters fails.
@@ -267,7 +280,7 @@ impl<S: Read + Write> SslStream<S> {
 
     /// Mutable access to the underlying transport.
     ///
-    /// # Safety
+    /// # Note
     ///
     /// Do not read from or write to the transport directly while TLS records
     /// are in flight - this will corrupt the TLS session.

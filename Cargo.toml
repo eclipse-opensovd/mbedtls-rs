@@ -19,8 +19,8 @@ license = "Apache-2.0"
 version = "0.1.0"
 
 [workspace.dependencies]
-mbedtls-sys = { path = "mbedtls-sys" }
-mbedtls-rs = { path = "mbedtls-rs" }
+mbedtls-sys = { path = "mbedtls-sys", version = "0.1.0" }
+mbedtls-rs = { path = "mbedtls-rs", version = "0.1.0" }
 
 # common crates
 const_format = "0.2.35"

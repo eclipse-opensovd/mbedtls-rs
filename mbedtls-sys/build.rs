@@ -60,7 +60,7 @@ const GENERATED_FILE_HEADER: &str = r"/*
 fn main() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    // vendor/ is at workspace root, two levels up from mbedtls-sys/
+    // vendor/ is at the workspace root, one level up from mbedtls-sys/
     let mbedtls_src = resolve_mbedtls_src(&manifest_dir);
 
     // Re-run triggers
@@ -101,6 +101,11 @@ fn main() {
     println!("cargo:rustc-link-lib=static=mbedtls");
     println!("cargo:rustc-link-lib=static=mbedx509");
     println!("cargo:rustc-link-lib=static=tfpsacrypto");
+
+    // On Windows, mbedtls_platform_get_entropy uses BCryptGenRandom (bcrypt.dll).
+    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
+        println!("cargo:rustc-link-lib=bcrypt");
+    }
 
     // Compile the ed25519 PSA accelerator shim (bridges PSA -> rust_ed25519_verify)
     cc::Build::new()

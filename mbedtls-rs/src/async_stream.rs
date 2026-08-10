@@ -121,6 +121,7 @@ impl MemBio {
 // BIO callbacks for the memory-buffered approach
 
 unsafe extern "C" fn membio_send(ctx: *mut c_void, buf: *const c_uchar, len: usize) -> c_int {
+    debug_assert!(!ctx.is_null());
     let bio = unsafe { &mut *ctx.cast::<MemBio>() };
     let slice = unsafe { std::slice::from_raw_parts(buf, len) };
     bio.outgoing.extend_from_slice(slice);
@@ -128,6 +129,7 @@ unsafe extern "C" fn membio_send(ctx: *mut c_void, buf: *const c_uchar, len: usi
 }
 
 unsafe extern "C" fn membio_recv(ctx: *mut c_void, buf: *mut c_uchar, len: usize) -> c_int {
+    debug_assert!(!ctx.is_null());
     let bio = unsafe { &mut *ctx.cast::<MemBio>() };
     let n = bio.read_incoming(unsafe { std::slice::from_raw_parts_mut(buf, len) });
     if n == 0 {
@@ -138,6 +140,13 @@ unsafe extern "C" fn membio_recv(ctx: *mut c_void, buf: *mut c_uchar, len: usize
 }
 
 /// An async TLS stream over a Tokio `AsyncRead + AsyncWrite` transport.
+//
+// Move-safety: `TlsStream` is auto-`Unpin` and may be moved between poll
+// calls. This is sound only because `mbedtls_ssl_context` holds no pointers
+// into its own struct memory: its buffer pointers (`in_buf`/`out_buf` etc.)
+// reference separately heap-allocated buffers, and the BIO context points to
+// the separately pinned `MemBio` box. If a future mbedtls version introduces
+// self-referential fields, this type must gain `PhantomPinned`.
 pub struct TlsStream<S> {
     ssl: ffi::mbedtls_ssl_context,
     bio: Pin<Box<MemBio>>,
@@ -156,6 +165,14 @@ where
     /// Perform a TLS **client** handshake asynchronously.
     /// If `hostname` is provided `mbedtls_ssl_set_hostname` is called. This enables Server Name
     /// Indication (SNI)
+    ///
+    /// # Security
+    ///
+    /// If `hostname` is `None`, SNI **and hostname verification are
+    /// disabled**: any certificate signed by a trusted CA is accepted
+    /// regardless of which host it was issued for, enabling
+    /// machine-in-the-middle attacks. Only pass `None` when the peer is
+    /// authenticated by other means (e.g. certificate pinning).
     ///
     /// # Errors
     /// * `IoError` with `psa_crypto_init` return code, if an error occurs while initializing
@@ -327,13 +344,24 @@ where
     ///   `ssl_close_nofify`
     /// * Any errors from `flush_outgoing` are propagated
     pub async fn shutdown(&mut self) -> io::Result<()> {
-        let ret = unsafe { ffi::mbedtls_ssl_close_notify(&raw mut self.ssl) };
-        self.flush_outgoing().await?;
-        if ret == 0 || MbedtlsError::from_raw(ret).is_peer_close_notify() {
-            Ok(())
-        } else {
-            Err(MbedtlsError::from_raw(ret).into())
+        // The alert may not fit in the output buffer in one go; retry after
+        // flushing (mirrors the async_handshake loop). Bounded to guard
+        // against a misbehaving state machine spinning on WANT_READ.
+        for _ in 0..16 {
+            let ret = unsafe { ffi::mbedtls_ssl_close_notify(&raw mut self.ssl) };
+            self.flush_outgoing().await?;
+            if ret == 0 {
+                return Ok(());
+            }
+            let err = MbedtlsError::from_raw(ret);
+            if err.is_peer_close_notify() {
+                return Ok(());
+            }
+            if !(err.is_want_read() || err.is_want_write()) {
+                return Err(err.into());
+            }
         }
+        Err(io::Error::other("TLS shutdown did not complete"))
     }
 
     /// Check if the `bio` has any pending outgoing data.

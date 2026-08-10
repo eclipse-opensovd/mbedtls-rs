@@ -14,6 +14,8 @@ all-features = true
 no-default-features = false
 
 [advisories]
+# No overrides: rely on cargo-deny defaults, which error on any known
+# unpatched advisory from the RustSec database.
 
 [licenses]
 allow = [
@@ -33,7 +35,10 @@ registries = []
 
 [bans]
 multiple-versions = "warn"
-wildcards = "allow"
+wildcards = "deny"
+# Internal workspace path dependencies (e.g. mbedtls-sys) carry no version
+# requirement; only these are exempt from the wildcard ban.
+allow-wildcard-paths = true
 highlight = "all"
 
 [sources]
