@@ -26,8 +26,11 @@ pub struct X509Certificate {
     inner: ffi::mbedtls_x509_crt,
 }
 
-// Safety: mbedtls_x509_crt is a self-contained data structure.
-// It is safe to send across threads once fully initialized.
+// Safety: mbedtls_x509_crt is a self-contained data structure. It is safe to
+// send across threads once fully initialized, provided the underlying mbedtls
+// library is built thread-safe (`multithread` feature enables
+// MBEDTLS_THREADING_C so the shared PSA crypto core is protected by mutexes).
+#[cfg(feature = "multithread")]
 unsafe impl Send for X509Certificate {}
 
 impl X509Certificate {
@@ -131,8 +134,11 @@ pub struct PrivateKey {
     inner: ffi::mbedtls_pk_context,
 }
 
-// Safety: mbedtls_pk_context is a self-contained data structure.
-// It is safe to send across threads once fully initialized.
+// Safety: mbedtls_pk_context is a self-contained data structure. It is safe to
+// send across threads once fully initialized, provided the underlying mbedtls
+// library is built thread-safe (`multithread` feature enables
+// MBEDTLS_THREADING_C so the shared PSA crypto core is protected by mutexes).
+#[cfg(feature = "multithread")]
 unsafe impl Send for PrivateKey {}
 
 impl PrivateKey {

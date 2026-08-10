@@ -29,6 +29,9 @@ doctest = false
 # Enable to regenerate src/bindings.rs from vendor/ mbedtls headers.
 # Requires clang to be installed. Run via scripts/regenerate-bindings.sh.
 generate-bindings = ["dep:bindgen"]
+# Build mbedtls with MBEDTLS_THREADING_C so the library is safe to use from
+# multiple threads (pthread on Unix, SRWLOCK-based MBEDTLS_THREADING_ALT on Windows).
+multithread = []
 
 [dependencies]
 

@@ -30,8 +30,7 @@ fn load_pair(cert: &str, key: &str) -> (X509Certificate, PrivateKey) {
 }
 
 fn init_psa() {
-    let ret = unsafe { mbedtls_rs::ffi::psa_crypto_init() };
-    assert_eq!(ret, 0, "psa_crypto_init failed: {ret}");
+    mbedtls_rs::init().expect("mbedtls init failed");
 }
 
 /// Regression test: registering multiple cert/key pairs must keep *all* of

@@ -213,12 +213,8 @@ where
 
     fn new_inner(config: Arc<SslConfig>, inner: S) -> io::Result<Self> {
         unsafe {
-            let psa_ret = ffi::psa_crypto_init();
-            if psa_ret != 0 {
-                return Err(io::Error::other(format!(
-                    "psa_crypto_init failed: {psa_ret}"
-                )));
-            }
+            // Initialise threading callbacks + PSA crypto (idempotent).
+            crate::init().map_err(|e| io::Error::other(format!("psa_crypto_init failed: {e}")))?;
 
             let mut ssl: ffi::mbedtls_ssl_context = std::mem::zeroed();
             ffi::mbedtls_ssl_init(&raw mut ssl);

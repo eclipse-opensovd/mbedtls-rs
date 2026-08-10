@@ -14,7 +14,7 @@
 load("@mbedtls_crates//:defs.bzl", "crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
-def mbedtls_rs_library(name, tokio = None, tracing = None, aliases = {}, visibility = None):
+def mbedtls_rs_library(name, tokio = None, tracing = None, multithread = True, aliases = {}, visibility = None):
     """Instantiates mbedtls-rs with the consumer's Rust dependency universe.
 
     Args:
@@ -22,6 +22,7 @@ def mbedtls_rs_library(name, tokio = None, tracing = None, aliases = {}, visibil
         tokio: label of the consumer's tokio crate, or None to build without
             the `tokio` feature (disables the async_stream module).
         tracing: label of the consumer's tracing crate.
+        multithread: whether to enable the `multithread` feature.
         aliases: forwarded to rust_library.
         visibility: forwarded to rust_library.
     """
@@ -32,6 +33,8 @@ def mbedtls_rs_library(name, tokio = None, tracing = None, aliases = {}, visibil
         deps.append(tokio)
     if tracing:
         deps.append(tracing)
+    if multithread:
+        rustc_flags.append("--cfg=feature=\"multithread\"")
     rust_library(
         name = name,
         aliases = aliases,

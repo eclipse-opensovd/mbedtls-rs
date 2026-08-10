@@ -17,7 +17,7 @@ cmake(
     name = "mbedtls_native",
     build_data = ["csrc/ed25519_psa_driver.h"],
     cache_entries = {
-        "CMAKE_C_FLAGS": "-DMBEDTLS_SSL_RECORD_SIZE_LIMIT -DMBEDTLS_SSL_NULL_CIPHERSUITES -DMBEDTLS_ED25519_PSA_DRIVER",
+        "CMAKE_C_FLAGS": "-DMBEDTLS_SSL_RECORD_SIZE_LIMIT -DMBEDTLS_SSL_NULL_CIPHERSUITES -DMBEDTLS_ED25519_PSA_DRIVER -DMBEDTLS_THREADING_C -DMBEDTLS_THREADING_PTHREAD",
         "ENABLE_PROGRAMS": "OFF",
         "ENABLE_TESTING": "OFF",
         "GEN_FILES": "OFF",
@@ -40,7 +40,11 @@ cc_library(
     hdrs = [
         "csrc/ed25519_psa_driver.h",
     ],
-    copts = ["-DMBEDTLS_ED25519_PSA_DRIVER"],
+    copts = [
+        "-DMBEDTLS_ED25519_PSA_DRIVER",
+        "-DMBEDTLS_THREADING_C",
+        "-DMBEDTLS_THREADING_PTHREAD",
+    ],
     deps = [":mbedtls_native"],
     alwayslink = True,
 )

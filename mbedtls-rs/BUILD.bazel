@@ -29,7 +29,10 @@ rust_library(
     crate_name = "mbedtls_rs",
     crate_root = "src/lib.rs",
     edition = "2024",
-    rustc_flags = ["--cfg=feature=\"tokio\""],
+    rustc_flags = [
+        "--cfg=feature=\"tokio\"",
+        "--cfg=feature=\"multithread\"",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//mbedtls-sys:mbedtls_sys",

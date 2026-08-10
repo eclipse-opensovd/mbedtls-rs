@@ -101,8 +101,12 @@ pub struct SslConfig {
 }
 
 // Safety: after building, the config is read-only and all referenced data is
-// owned. mbedtls_ssl_config is safe to share across threads.
+// owned. mbedtls_ssl_config is safe to share across threads, provided the
+// underlying mbedtls library is built thread-safe (`multithread` feature
+// enables MBEDTLS_THREADING_C so shared PSA state is protected by mutexes).
+#[cfg(feature = "multithread")]
 unsafe impl Send for SslConfig {}
+#[cfg(feature = "multithread")]
 unsafe impl Sync for SslConfig {}
 
 /// Builder for [`SslConfig`].
@@ -352,10 +356,17 @@ impl SslConfigBuilder {
         Ok(self)
     }
 
-    // ---- build ----
-
     /// Freeze the configuration and return a shareable `Arc<SslConfig>`.
     #[must_use]
+    #[cfg_attr(
+        not(feature = "multithread"),
+        expect(
+            clippy::arc_with_non_send_sync,
+            reason = "Arc keeps the public API identical across features; without `multithread` \
+                      SslConfig is intentionally !Send/!Sync and the Arc is only ever used on a \
+                      single thread"
+        )
+    )]
     pub fn build(mut self) -> Arc<SslConfig> {
         self.is_built = true;
         Arc::new(SslConfig {

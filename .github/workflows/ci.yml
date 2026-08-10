@@ -55,6 +55,11 @@ jobs:
       - name: Test
         run: cargo test --locked --verbose
 
+      - name: Test (single-threaded, no multithread feature)
+        # Without the multithread feature mbedtls is built without locking,
+        # so tests must run on a single thread.
+        run: cargo test --locked --verbose --no-default-features --features tokio -- --test-threads=1
+
   rust_quality:
     name: Rust quality
     runs-on: ubuntu-latest

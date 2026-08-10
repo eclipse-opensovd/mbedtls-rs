@@ -137,3 +137,33 @@ pub mod x509;
 
 #[cfg(feature = "tokio")]
 pub mod async_stream;
+
+/// Initialize the mbedtls library for this process.
+///
+/// Registers OS threading callbacks where required (Windows with the
+/// `multithread` feature) and initializes the PSA crypto core. Idempotent and
+/// safe to call multiple times; streams call it implicitly during handshakes,
+/// but call it early on the main thread if you use certificates or keys from
+/// multiple threads before the first handshake.
+///
+/// # Thread safety
+///
+/// Without the `multithread` feature, the underlying mbedtls library is built
+/// without locking and this crate does not implement `Send`/`Sync` for its
+/// types: keep all mbedtls usage on a single thread.
+///
+/// # Errors
+/// * `MbedtlsError` with the `psa_crypto_init` status code on failure.
+pub fn init() -> Result<(), error::MbedtlsError> {
+    #[cfg(all(feature = "multithread", windows))]
+    {
+        static THREADING_SETUP: std::sync::Once = std::sync::Once::new();
+        // Safety: mbedtls_rs_threading_setup only registers function pointers;
+        // Once guarantees it runs exactly once, before psa_crypto_init below.
+        THREADING_SETUP.call_once(|| unsafe { ffi::mbedtls_rs_threading_setup() });
+    }
+    // Safety: FFI call with no arguments; idempotent per PSA API contract.
+    let ret = unsafe { ffi::psa_crypto_init() };
+    error::result_from_raw(ret)?;
+    Ok(())
+}

@@ -24,8 +24,13 @@ doctest = false
 workspace = true
 
 [features]
-default = ["tokio"]
+default = ["tokio", "multithread"]
 tokio = ["dep:tokio"]
+# Thread-safe mbedtls build. Enables MBEDTLS_THREADING_C in the C library and
+# the Send/Sync impls on wrapper types. Without this feature the underlying
+# library has unguarded global state (PSA core), so all mbedtls usage must stay
+# on a single thread.
+multithread = ["mbedtls-sys/multithread"]
 
 [dependencies]
 ed25519-dalek = "2"

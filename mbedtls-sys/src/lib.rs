@@ -33,3 +33,13 @@
 )]
 
 include!("bindings.rs");
+
+#[cfg(all(feature = "multithread", windows))]
+unsafe extern "C" {
+    /// Windows threading shim (csrc/threading_win32.c).
+    ///
+    /// Registers SRWLOCK/CONDITION_VARIABLE based callbacks via
+    /// `mbedtls_threading_set_alt`. Must be called once, before any other
+    /// mbedtls function, when the `multithread` feature is enabled on Windows.
+    pub fn mbedtls_rs_threading_setup();
+}

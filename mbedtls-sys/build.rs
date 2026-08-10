@@ -72,8 +72,12 @@ fn main() {
     let out_dir =
         PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set - must be run by Cargo"));
 
+    let target_windows = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows");
+    let multithread = env::var("CARGO_FEATURE_MULTITHREAD").is_ok();
+
     // Build mbedtls via cmake
-    cmake::Config::new(&mbedtls_src)
+    let mut cmake_cfg = cmake::Config::new(&mbedtls_src);
+    cmake_cfg
         .define("USE_STATIC_MBEDTLS_LIBRARY", "ON")
         .define("USE_SHARED_MBEDTLS_LIBRARY", "OFF")
         .define("ENABLE_TESTING", "OFF")
@@ -86,8 +90,22 @@ fn main() {
         // Enable NULL cipher (required for ECDHE_ECDSA_WITH_NULL_SHA etc.)
         .cflag("-DMBEDTLS_SSL_NULL_CIPHERSUITES")
         // Enable our Ed25519 PSA accelerator driver.
-        .cflag("-DMBEDTLS_ED25519_PSA_DRIVER")
-        .build();
+        .cflag("-DMBEDTLS_ED25519_PSA_DRIVER");
+
+    if multithread {
+        cmake_cfg.cflag("-DMBEDTLS_THREADING_C");
+        if target_windows {
+            // No pthread on MSVC: use MBEDTLS_THREADING_ALT with our
+            // SRWLOCK-based csrc/threading_alt.h.
+            cmake_cfg
+                .cflag("-DMBEDTLS_THREADING_ALT")
+                .cflag(format!("-I{}", manifest_dir.join("csrc").display()));
+        } else {
+            cmake_cfg.cflag("-DMBEDTLS_THREADING_PTHREAD");
+        }
+    }
+
+    cmake_cfg.build();
 
     // Link search paths emitted by cmake
     for lib in ["lib", "build/library"] {
@@ -103,13 +121,13 @@ fn main() {
     println!("cargo:rustc-link-lib=static=tfpsacrypto");
 
     // On Windows, mbedtls_platform_get_entropy uses BCryptGenRandom (bcrypt.dll).
-    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
+    if target_windows {
         println!("cargo:rustc-link-lib=bcrypt");
     }
 
     // Compile the ed25519 PSA accelerator shim (bridges PSA -> rust_ed25519_verify)
-    cc::Build::new()
-        .file(manifest_dir.join("csrc").join("ed25519_psa_driver.c"))
+    let mut shim = cc::Build::new();
+    shim.file(manifest_dir.join("csrc").join("ed25519_psa_driver.c"))
         .include(manifest_dir.join("csrc"))
         .include(mbedtls_src.join("tf-psa-crypto").join("include"))
         .include(
@@ -120,8 +138,20 @@ fn main() {
                 .join("include"),
         )
         .include(mbedtls_src.join("include"))
-        .warnings(false)
-        .compile("ed25519_psa_driver");
+        .warnings(false);
+
+    if multithread {
+        shim.define("MBEDTLS_THREADING_C", None);
+        if target_windows {
+            // SRWLOCK mutex implementation + mbedtls_threading_set_alt registration.
+            shim.define("MBEDTLS_THREADING_ALT", None)
+                .file(manifest_dir.join("csrc").join("threading_win32.c"));
+        } else {
+            shim.define("MBEDTLS_THREADING_PTHREAD", None);
+        }
+    }
+
+    shim.compile("ed25519_psa_driver");
 
     // Optionally regenerate bindings (requires `generate-bindings` feature + clang).
     #[cfg(feature = "generate-bindings")]
@@ -194,6 +224,15 @@ fn regenerate_bindings(manifest_dir: &Path, mbedtls_src: &Path) {
         .allowlist_var("TF_PSA_CRYPTO_.*")
         .blocklist_var("MBEDTLS_MPI_UINT_MAX")
         .blocklist_var("MBEDTLS_PRINTF_MS_TIME")
+        // The SSL cache/ticket contexts embed mbedtls_threading_mutex_t when
+        // MBEDTLS_THREADING_C is enabled (`multithread` feature), which makes
+        // their layout feature- and platform-dependent. They are unused by the
+        // wrapper, so exclude them to keep a single portable bindings file.
+        .blocklist_type("mbedtls_ssl_cache_context")
+        .blocklist_type("mbedtls_ssl_cache_entry")
+        .blocklist_function("mbedtls_ssl_cache_.*")
+        .blocklist_type("mbedtls_ssl_ticket_context")
+        .blocklist_function("mbedtls_ssl_ticket_.*")
         .derive_debug(true)
         .derive_default(true)
         .derive_copy(true)
@@ -213,6 +252,11 @@ fn regenerate_bindings(manifest_dir: &Path, mbedtls_src: &Path) {
         .clang_arg("-DMBEDTLS_SSL_RECORD_SIZE_LIMIT")
         .clang_arg("-DMBEDTLS_SSL_NULL_CIPHERSUITES")
         .clang_arg("-DMBEDTLS_ED25519_PSA_DRIVER");
+    // Note: deliberately no MBEDTLS_THREADING_C here even with the
+    // `multithread` feature. The threading defines only add API we do not use
+    // and platform-specific mutex types, and change the layout of the (block-
+    // listed) SSL cache/ticket contexts. Keeping bindings threading-free makes
+    // the generated file identical across features and platforms.
 
     if let Ok(sysroot) = env::var("BINDGEN_SYSROOT") {
         builder = builder.clang_arg(format!("--sysroot={sysroot}"));
