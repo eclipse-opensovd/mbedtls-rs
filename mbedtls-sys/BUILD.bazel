@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+cmake(
+    name = "mbedtls_native",
+    build_data = ["csrc/ed25519_psa_driver.h"],
+    cache_entries = {
+        "CMAKE_C_FLAGS": "-DMBEDTLS_SSL_RECORD_SIZE_LIMIT -DMBEDTLS_SSL_NULL_CIPHERSUITES -DMBEDTLS_ED25519_PSA_DRIVER -DMBEDTLS_THREADING_C -DMBEDTLS_THREADING_PTHREAD",
+        "ENABLE_PROGRAMS": "OFF",
+        "ENABLE_TESTING": "OFF",
+        "GEN_FILES": "OFF",
+        "MBEDTLS_FATAL_WARNINGS": "OFF",
+        "MBEDTLS_PRESERVE_TOOLCHAIN_ARCHIVER": "ON",
+        "USE_SHARED_MBEDTLS_LIBRARY": "OFF",
+        "USE_STATIC_MBEDTLS_LIBRARY": "ON",
+    },
+    lib_source = "//vendor/mbedtls-4.0.0:source",
+    out_static_libs = [
+        "libmbedtls.a",
+        "libmbedx509.a",
+        "libtfpsacrypto.a",
+    ],
+)
+
+cc_library(
+    name = "ed25519_psa_driver",
+    srcs = ["csrc/ed25519_psa_driver.c"],
+    hdrs = [
+        "csrc/ed25519_psa_driver.h",
+    ],
+    copts = [
+        "-DMBEDTLS_ED25519_PSA_DRIVER",
+        "-DMBEDTLS_THREADING_C",
+        "-DMBEDTLS_THREADING_PTHREAD",
+    ],
+    deps = [":mbedtls_native"],
+    alwayslink = True,
+)
+
+rust_library(
+    name = "mbedtls_sys",
+    srcs = [
+        "src/bindings.rs",
+        "src/lib.rs",
+    ],
+    crate_name = "mbedtls_sys",
+    crate_root = "src/lib.rs",
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [":ed25519_psa_driver"],
+)

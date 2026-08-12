@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Copyright (c) Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[workspace]
+resolver = "3"
+members = ["mbedtls-sys", "mbedtls-rs"]
+
+[workspace.package]
+edition = "2024"
+license = "Apache-2.0"
+version = "0.1.0"
+
+[workspace.dependencies]
+mbedtls-sys = { path = "mbedtls-sys", version = "0.1.0" }
+mbedtls-rs = { path = "mbedtls-rs", version = "0.1.0" }
+
+# common crates
+const_format = "0.2.35"
+
+[workspace.lints.clippy]
+# enable pedantic
+pedantic = { level = "deny", priority = -1 }
+## exclude some too pedantic lints for now
+similar_names = "allow"
+
+# additional lints
+clone_on_ref_ptr = "deny"
+indexing_slicing = "deny"
+unwrap_used = "deny"
+arithmetic_side_effects = "deny"
+separated_literal_suffix = "deny"
+disallowed_methods = "deny"
+string_slice = "deny"
+needless_pass_by_ref_mut = "deny"
+allow_attributes_without_reason = "deny"
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(nightly)'] }
