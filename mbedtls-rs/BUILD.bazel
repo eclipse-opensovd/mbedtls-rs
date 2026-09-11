@@ -9,9 +9,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-load("@mbedtls_crates//:defs.bzl", "crate_deps")
-load("@rules_rust//rust:defs.bzl", "rust_library")
-
 exports_files(
     ["src/lib.rs"],
     visibility = ["//visibility:public"],
@@ -21,24 +18,4 @@ filegroup(
     name = "srcs",
     srcs = glob(["src/**/*.rs"]),
     visibility = ["//visibility:public"],
-)
-
-rust_library(
-    name = "mbedtls_rs",
-    srcs = [":srcs"],
-    crate_name = "mbedtls_rs",
-    crate_root = "src/lib.rs",
-    edition = "2024",
-    rustc_flags = [
-        "--cfg=feature=\"tokio\"",
-        "--cfg=feature=\"multithread\"",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//mbedtls-sys:mbedtls_sys",
-    ] + crate_deps([
-        "ed25519-dalek",
-        "tokio",
-        "tracing",
-    ]),
 )

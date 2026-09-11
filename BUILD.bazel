@@ -9,9 +9,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-alias(
+load("@mbedtls_crates//:defs.bzl", "aliases")
+load("//:defs.bzl", "mbedtls_rs_library")
+
+mbedtls_rs_library(
     name = "mbedtls_rs",
-    actual = "//mbedtls-rs:mbedtls_rs",
+    aliases = aliases(),
+    ed25519_dalek = "@mbedtls_crates//:ed25519-dalek",
+    tokio = "@mbedtls_crates//:tokio",
+    tracing = "@mbedtls_crates//:tracing",
     visibility = ["//visibility:public"],
 )
 
