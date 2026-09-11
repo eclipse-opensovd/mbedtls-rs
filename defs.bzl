@@ -11,14 +11,21 @@
 
 """Consumer-instantiated mbedtls-rs targets."""
 
-load("@mbedtls_crates//:defs.bzl", "crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
-def mbedtls_rs_library(name, tokio = None, tracing = None, multithread = True, aliases = {}, visibility = None):
+def mbedtls_rs_library(
+        name,
+        ed25519_dalek,
+        tokio = None,
+        tracing = None,
+        multithread = True,
+        aliases = {},
+        visibility = None):
     """Instantiates mbedtls-rs with the consumer's Rust dependency universe.
 
     Args:
         name: target name.
+        ed25519_dalek: label of the consumer's ed25519-dalek crate.
         tokio: label of the consumer's tokio crate, or None to build without
             the `tokio` feature (disables the async_stream module).
         tracing: label of the consumer's tracing crate.
@@ -27,7 +34,10 @@ def mbedtls_rs_library(name, tokio = None, tracing = None, multithread = True, a
         visibility: forwarded to rust_library.
     """
     rustc_flags = []
-    deps = [Label("//mbedtls-sys:mbedtls_sys")]
+    deps = [
+        Label("//mbedtls-sys:mbedtls_sys"),
+        ed25519_dalek,
+    ]
     if tokio:
         rustc_flags.append("--cfg=feature=\"tokio\"")
         deps.append(tokio)
@@ -44,8 +54,5 @@ def mbedtls_rs_library(name, tokio = None, tracing = None, multithread = True, a
         edition = "2024",
         rustc_flags = rustc_flags,
         visibility = visibility,
-        deps = deps + crate_deps(
-            ["ed25519-dalek"],
-            package_name = "mbedtls-rs",
-        ),
+        deps = deps,
     )
