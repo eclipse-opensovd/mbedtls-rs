@@ -38,12 +38,12 @@ mbedtls-rs/
 |   |   |-- lib.rs
 |   |   `-- bindings.rs        pre-generated, committed
 |   |-- csrc/                  ed25519 PSA driver shim (C)
-|   `-- patches/               unified diffs applied to vendor source
+|   |-- patches/               unified diffs applied to vendor source
+|   `-- vendor/
+|       `-- mbedtls-4.0.0/     pre-patched mbedtls source (committed)
 |-- mbedtls-rs/
 |   |-- Cargo.toml
 |   `-- src/                   safe wrapper + async TLS stream
-|-- vendor/
-|   `-- mbedtls-4.0.0/         pre-patched mbedtls source (committed)
 `-- scripts/
     |-- refresh-vendor.sh      upgrade vendor source + re-apply patches
     `-- regenerate-bindings.sh regenerate src/bindings.rs (requires clang)

@@ -16,7 +16,7 @@ SPDX-FileCopyrightText = "2026 Copyright (c) Contributors to the Eclipse Foundat
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
-path = "vendor/mbedtls-4.0.0/**"
+path = "mbedtls-sys/vendor/mbedtls-4.0.0/**"
 precedence = "override"
 SPDX-FileCopyrightText = "Copyright The Mbed TLS Contributors"
 SPDX-License-Identifier = "Apache-2.0"

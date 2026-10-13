@@ -12,7 +12,8 @@
 #
 # refresh-vendor.sh
 #
-# Downloads mbedtls, applies our patches, and replaces vendor/mbedtls-{VERSION}/.
+# Downloads mbedtls, applies our patches, and replaces
+# mbedtls-sys/vendor/mbedtls-{VERSION}/.
 # Run this when upgrading mbedtls or after modifying patches.
 #
 # Usage:
@@ -27,10 +28,10 @@
 # The script will:
 #   1. Download mbedtls-{VERSION}.tar.bz2 from GitHub releases
 #   2. Verify SHA-256
-#   3. Extract to vendor/mbedtls-{VERSION}-staging/
+#   3. Extract to mbedtls-sys/vendor/mbedtls-{VERSION}-staging/
 #   4. Remove files not used by the library-only build
 #   5. Apply all patches from mbedtls-sys/patches/ in order
-#   6. Replace vendor/mbedtls-{VERSION}/ with the staging tree
+#   6. Replace mbedtls-sys/vendor/mbedtls-{VERSION}/ with the staging tree
 
 set -euo pipefail
 
@@ -40,7 +41,7 @@ MBEDTLS_VERSION="4.0.0"
 TARBALL_URL="https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2"
 TARBALL_SHA="2f3a47f7b3a541ddef450e4867eeecb7ce2ef7776093f3a11d6d43ead6bf2827"
 
-VENDOR_DIR="${REPO_ROOT}/vendor"
+VENDOR_DIR="${REPO_ROOT}/mbedtls-sys/vendor"
 PATCHES_DIR="${REPO_ROOT}/mbedtls-sys/patches"
 STAGING="${VENDOR_DIR}/mbedtls-${MBEDTLS_VERSION}-staging"
 TARGET="${VENDOR_DIR}/mbedtls-${MBEDTLS_VERSION}"
@@ -211,5 +212,5 @@ if [ -d "$TARGET" ]; then
 fi
 mv "$STAGING" "$TARGET"
 
-log "Done. vendor/mbedtls-${MBEDTLS_VERSION} updated."
+log "Done. mbedtls-sys/vendor/mbedtls-${MBEDTLS_VERSION} updated."
 log "If bindings need regeneration, run: scripts/regenerate-bindings.sh"
