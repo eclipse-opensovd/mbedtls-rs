@@ -14,7 +14,7 @@
 //! Build script for mbedtls-sys.
 //!
 //! Normal build (`cargo build`):
-//!   - Locates pre-patched mbedtls source in `vendor/mbedtls-4.0.0/` (workspace root).
+//!   - Locates pre-patched mbedtls source in `vendor/mbedtls-4.0.0/`.
 //!   - Compiles mbedtls via cmake.
 //!   - Compiles the ed25519 PSA driver shim via cc.
 //!   - Links the three static archives: mbedtls, mbedx509, tfpsacrypto.
@@ -60,7 +60,6 @@ const GENERATED_FILE_HEADER: &str = r"/*
 fn main() {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    // vendor/ is at the workspace root, one level up from mbedtls-sys/
     let mbedtls_src = resolve_mbedtls_src(&manifest_dir);
 
     // Re-run triggers
@@ -162,7 +161,7 @@ fn main() {
 ///
 /// Priority:
 /// 1. `MBEDTLS_DIR` env var (absolute or relative to cwd).
-/// 2. `../../vendor/mbedtls-{VERSION}/` relative to the crate manifest (i.e. workspace root).
+/// 2. `vendor/mbedtls-{VERSION}/` relative to the crate manifest.
 fn resolve_mbedtls_src(manifest_dir: &Path) -> PathBuf {
     if let Ok(dir) = env::var(MBEDTLS_SOURCE_OVERRIDE_VAR) {
         let p = PathBuf::from(dir);
@@ -174,9 +173,7 @@ fn resolve_mbedtls_src(manifest_dir: &Path) -> PathBuf {
         return p;
     }
 
-    // workspace root/vendor/mbedtls-{VERSION}
     let vendor_path = manifest_dir
-        .join("..")
         .join("vendor")
         .join(format!("mbedtls-{MBEDTLS_VERSION}"));
 

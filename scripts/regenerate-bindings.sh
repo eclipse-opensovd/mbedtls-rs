@@ -22,7 +22,7 @@
 #   - clang (for bindgen's libclang)
 #   - Rust 1.88 toolchain (cargo)
 #   - pinned nightly Rust toolchain with rustfmt
-#   - vendor/mbedtls-4.0.0/ must exist (run refresh-vendor.sh first)
+#   - mbedtls-sys/vendor/mbedtls-4.0.0/ must exist (run refresh-vendor.sh first)
 #
 # Cross-compilation:
 #   Set BINDGEN_SYSROOT to your SDK sysroot before running this script.
@@ -36,9 +36,9 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 log() { echo "[regenerate-bindings] $*"; }
 err() { echo "[regenerate-bindings] ERROR: $*" >&2; exit 1; }
 
-VENDOR="${REPO_ROOT}/vendor/mbedtls-4.0.0"
+VENDOR="${REPO_ROOT}/mbedtls-sys/vendor/mbedtls-4.0.0"
 if [ ! -f "${VENDOR}/CMakeLists.txt" ]; then
-    err "vendor/mbedtls-4.0.0/ not found. Run scripts/refresh-vendor.sh first."
+    err "mbedtls-sys/vendor/mbedtls-4.0.0/ not found. Run scripts/refresh-vendor.sh first."
 fi
 
 if ! command -v clang >/dev/null 2>&1; then

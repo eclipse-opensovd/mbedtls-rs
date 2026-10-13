@@ -27,7 +27,7 @@ cmake(
         "USE_SHARED_MBEDTLS_LIBRARY": "OFF",
         "USE_STATIC_MBEDTLS_LIBRARY": "ON",
     },
-    lib_source = "//vendor/mbedtls-4.0.0:source",
+    lib_source = "//mbedtls-sys/vendor/mbedtls-4.0.0:source",
     out_static_libs = [
         "libmbedtls.a",
         "libmbedx509.a",

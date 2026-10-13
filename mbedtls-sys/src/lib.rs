@@ -16,7 +16,7 @@
 //! These are not intended for direct use. Use `mbedtls-rs` instead.
 //!
 //! The bindings are pre-generated and checked in as `src/bindings.rs`.
-//! To regenerate after updating vendor/mbedtls-4.0.0/, run:
+//! To regenerate after updating mbedtls-sys/vendor/mbedtls-4.0.0/, run:
 //!
 //! ```sh
 //! scripts/regenerate-bindings.sh
