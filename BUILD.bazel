@@ -24,5 +24,6 @@ mbedtls_rs_library(
 exports_files([
     "Cargo.lock",
     "Cargo.toml",
+    "cargo-bazel-lock.json",
     "defs.bzl",
 ])
