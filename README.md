@@ -113,15 +113,15 @@ scripts/regenerate-bindings.sh
 
 The Bazel module ships `cargo-bazel-lock.json` so downstream modules can use
 its crate universe without repinning dependencies. After changing Cargo
-dependencies or crate-universe configuration, regenerate the lockfiles:
+dependencies or crate-universe configuration, regenerate the crate-universe lockfile:
 
 ```sh
 CARGO_BAZEL_REPIN=1 bazel fetch --lockfile_mode=update @mbedtls_crates//...
-bazel mod deps --lockfile_mode=update
 bazel build //:mbedtls_rs
 ```
 
-Commit the generated crate-universe and module lockfiles together.
+Commit the generated `cargo-bazel-lock.json`. The Bazel module lockfile
+(`MODULE.bazel.lock`) is generated locally and ignored by Git.
 
 ### Cargo
 

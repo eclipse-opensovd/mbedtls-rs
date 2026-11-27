@@ -12,6 +12,7 @@
 # Build artifacts
 /target/
 /bazel-*
+/MODULE.bazel.lock
 
 # Editor/IDE
 .idea/
