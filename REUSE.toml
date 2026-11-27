@@ -8,7 +8,6 @@ path = [
   ".bazelversion",
   "Cargo.lock",
   "LICENSE",
-  "MODULE.bazel.lock",
   "mbedtls-sys/src/bindings.rs",
 ]
 precedence = "aggregate"
