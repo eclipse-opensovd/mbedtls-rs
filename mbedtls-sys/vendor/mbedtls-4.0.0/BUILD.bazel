@@ -1,5 +1,159 @@
 # SPDX-License-Identifier: Apache-2.0
 
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+
+# Native Bazel build of the three static libraries the upstream CMake build
+# produces (tfpsacrypto, mbedx509, mbedtls). Source lists, include
+# directories and C standard follow the CMakeLists.txt files in this tree with
+# GEN_FILES=OFF; keep them in sync when the vendored version changes.
+
+# Same feature defines the Cargo build passes via CMAKE_C_FLAGS. They are
+# exported through `defines` because they change public struct layouts
+# (MBEDTLS_THREADING_C), so every C dependent must see them.
+MBEDTLS_DEFINES = [
+    "MBEDTLS_SSL_RECORD_SIZE_LIMIT",
+    "MBEDTLS_SSL_NULL_CIPHERSUITES",
+    "MBEDTLS_ED25519_PSA_DRIVER",
+    "MBEDTLS_THREADING_C",
+    "MBEDTLS_THREADING_PTHREAD",
+]
+
+config_setting(
+    name = "dbg",
+    values = {"compilation_mode": "dbg"},
+)
+
+# rules_foreign_cc configured CMake as Release for fastbuild and opt, where
+# the upstream flags end in -O2. Keep that so crypto code is not built at -O0
+# by default; dbg keeps the toolchain defaults like the CMake Debug build.
+MBEDTLS_COPTS = ["-std=c99"] + select({
+    ":dbg": [],
+    "//conditions:default": ["-O2"],
+})
+
+# Private include directories are implementation_deps so they do not leak to
+# dependents, matching PRIVATE target_include_directories in CMake.
+cc_library(
+    name = "tfpsacrypto_private_headers",
+    hdrs = glob([
+        "tf-psa-crypto/core/*.h",
+        "tf-psa-crypto/drivers/builtin/src/*.h",
+        "tf-psa-crypto/drivers/p256-m/p256-m/*.h",
+    ]),
+    includes = [
+        "tf-psa-crypto/core",
+        "tf-psa-crypto/drivers/builtin/src",
+        "tf-psa-crypto/drivers/everest/include/tf-psa-crypto/private/everest",
+        "tf-psa-crypto/drivers/everest/include/tf-psa-crypto/private/everest/kremlib",
+        "tf-psa-crypto/drivers/p256-m/p256-m",
+    ],
+)
+
+cc_library(
+    name = "mbedtls_private_headers",
+    hdrs = glob(["library/*.h"]),
+    includes = ["library"],
+    deps = [":tfpsacrypto_private_headers"],
+)
+
+cc_library(
+    name = "tfpsacrypto",
+    srcs = [
+        "tf-psa-crypto/core/psa_crypto.c",
+        "tf-psa-crypto/core/psa_crypto_client.c",
+        "tf-psa-crypto/core/psa_crypto_driver_wrappers_no_static.c",
+        "tf-psa-crypto/core/psa_crypto_slot_management.c",
+        "tf-psa-crypto/core/psa_crypto_storage.c",
+        "tf-psa-crypto/core/psa_its_file.c",
+        "tf-psa-crypto/core/tf_psa_crypto_config.c",
+        "tf-psa-crypto/core/tf_psa_crypto_version.c",
+        "tf-psa-crypto/drivers/everest/library/Hacl_Curve25519_joined.c",
+        "tf-psa-crypto/drivers/everest/library/everest.c",
+        "tf-psa-crypto/drivers/everest/library/x25519.c",
+        "tf-psa-crypto/drivers/p256-m/p256-m/p256-m.c",
+        "tf-psa-crypto/drivers/p256-m/p256-m_driver_entrypoints.c",
+    ] + glob(["tf-psa-crypto/drivers/builtin/src/*.c"]),
+    hdrs = glob([
+        "tf-psa-crypto/drivers/builtin/include/**/*.h",
+        "tf-psa-crypto/drivers/everest/include/**/*.h",
+        "tf-psa-crypto/drivers/p256-m/*.h",
+        "tf-psa-crypto/include/**/*.h",
+    ]),
+    copts = MBEDTLS_COPTS,
+    defines = MBEDTLS_DEFINES,
+    includes = [
+        "tf-psa-crypto/drivers/builtin/include",
+        "tf-psa-crypto/drivers/everest/include",
+        "tf-psa-crypto/drivers/p256-m",
+        "tf-psa-crypto/include",
+    ],
+    implementation_deps = [":tfpsacrypto_private_headers"],
+    # Hacl_Curve25519_joined.c includes these sources instead of compiling
+    # them separately.
+    textual_hdrs = [
+        "tf-psa-crypto/drivers/everest/library/Hacl_Curve25519.c",
+        "tf-psa-crypto/drivers/everest/library/kremlib/FStar_UInt128_extracted.c",
+        "tf-psa-crypto/drivers/everest/library/kremlib/FStar_UInt64_FStar_UInt32_FStar_UInt16_FStar_UInt8.c",
+        "tf-psa-crypto/drivers/everest/library/legacy/Hacl_Curve25519.c",
+    ],
+    visibility = ["//mbedtls-sys:__pkg__"],
+)
+
+cc_library(
+    name = "mbedx509",
+    srcs = [
+        "library/error.c",
+        "library/mbedtls_config.c",
+        "library/pkcs7.c",
+        "library/x509.c",
+        "library/x509_create.c",
+        "library/x509_crl.c",
+        "library/x509_crt.c",
+        "library/x509_csr.c",
+        "library/x509_oid.c",
+        "library/x509write.c",
+        "library/x509write_crt.c",
+        "library/x509write_csr.c",
+    ],
+    hdrs = glob(["include/**/*.h"]),
+    copts = MBEDTLS_COPTS,
+    includes = ["include"],
+    implementation_deps = [":mbedtls_private_headers"],
+    visibility = ["//mbedtls-sys:__pkg__"],
+    deps = [":tfpsacrypto"],
+)
+
+cc_library(
+    name = "mbedtls",
+    srcs = [
+        "library/debug.c",
+        "library/mps_reader.c",
+        "library/mps_trace.c",
+        "library/net_sockets.c",
+        "library/ssl_cache.c",
+        "library/ssl_ciphersuites.c",
+        "library/ssl_client.c",
+        "library/ssl_cookie.c",
+        "library/ssl_debug_helpers_generated.c",
+        "library/ssl_msg.c",
+        "library/ssl_ticket.c",
+        "library/ssl_tls.c",
+        "library/ssl_tls12_client.c",
+        "library/ssl_tls12_server.c",
+        "library/ssl_tls13_client.c",
+        "library/ssl_tls13_generic.c",
+        "library/ssl_tls13_keys.c",
+        "library/ssl_tls13_server.c",
+        "library/timing.c",
+        "library/version.c",
+        "library/version_features.c",
+    ],
+    copts = MBEDTLS_COPTS,
+    implementation_deps = [":mbedtls_private_headers"],
+    visibility = ["//mbedtls-sys:__pkg__"],
+    deps = [":mbedx509"],
+)
+
 filegroup(
     name = "source",
     srcs = glob(
